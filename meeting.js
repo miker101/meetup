@@ -50,9 +50,11 @@ const currentUser = {
 name: displayName,
 
 micOn: true
+    
 
 
 };
+let microphoneStream = null;
 
 /* =========================
 ELEMENTS
@@ -445,6 +447,40 @@ participantId
 connectToMeeting();
 
 }
+async function requestMicrophoneAccess() {
+
+try {
+
+    microphoneStream =
+        await navigator.mediaDevices.getUserMedia({
+            audio: true
+        });
+
+    console.log(
+        "Microphone access granted."
+    );
+
+    console.log(
+        "Microphone stream:",
+        microphoneStream
+    );
+
+} catch (error) {
+
+    console.error(
+        "Microphone access failed:",
+        error
+    );
+
+    alert(
+        "Microphone access is required for voice chat."
+    );
+
+}
+
+
+}
+
 
 /* =========================
 MICROPHONE
@@ -493,19 +529,40 @@ if (currentUser.micOn) {
 
 microphoneButton.addEventListener(
 "click",
-function () {
+async function () {
 
 
-    currentUser.micOn =
-        !currentUser.micOn;
+/*
+ * If we don't have microphone access yet,
+ * request it from the browser.
+ */
 
+if (!microphoneStream) {
 
-    updateMicrophoneButton();
+    await requestMicrophoneAccess();
+
+    /*
+     * If microphone access failed,
+     * stop here.
+     */
+
+    if (!microphoneStream) {
+
+        return;
+
+    }
 
 }
 
+currentUser.micOn =
+    !currentUser.micOn;
 
+updateMicrophoneButton();
+
+
+}
 );
+
 
 updateMicrophoneButton();
 
