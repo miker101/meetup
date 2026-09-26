@@ -55,6 +55,25 @@ micOn: true
 
 };
 let microphoneStream = null;
+let peerConnection = null;
+
+let remoteAudio = null;
+
+let pendingIceCandidates = [];
+
+
+const rtcConfiguration = {
+
+
+iceServers: [
+    {
+        urls: "stun:stun.l.google.com:19302"
+    }
+]
+
+
+};
+
 
 /* =========================
 ELEMENTS
@@ -253,6 +272,458 @@ let meetingSocket = null;
 CONNECT TO MEETING
 ========================= */
 
+function createPeerConnection() {
+
+peerConnection =
+    new RTCPeerConnection(
+        rtcConfiguration
+    );
+
+console.log(
+    "WebRTC peer connection created."
+);
+
+
+/*
+ * Add our microphone tracks
+ * to the WebRTC connection.
+ */
+
+if (microphoneStream) {
+
+    microphoneStream
+        .getTracks()
+        .forEach(function (track) {
+
+            peerConnection.addTrack(
+                track,
+                microphoneStream
+            );
+
+        });
+
+}
+
+
+/*
+ * Receive audio from the other
+ * participant.
+ */
+
+peerConnection.ontrack =
+    function (event) {
+
+        console.log(
+            "Remote audio track received."
+        );
+
+        if (!remoteAudio) {
+
+            remoteAudio =
+                document.createElement(
+                    "audio"
+                );
+
+            remoteAudio.autoplay = true;
+
+            document.body.appendChild(
+                remoteAudio
+            );
+
+        }
+
+        remoteAudio.srcObject =
+            event.streams[0];
+
+    };
+
+
+/*
+ * Send ICE candidates through
+ * our existing WebSocket.
+ */
+
+peerConnection.onicecandidate =
+    function (event) {
+
+        if (
+            event.candidate &&
+            meetingSocket
+        ) {
+
+            meetingSocket.send(
+                JSON.stringify({
+
+                    type: "ice_candidate",
+
+                    meetingId:
+                        meetingId,
+
+                    participantId:
+                        participantId,
+
+                    candidate:
+                        event.candidate
+
+                })
+            );
+
+        }
+
+    };
+
+}
+
+async function startWebRTC() {
+
+    /*
+     * We need microphone access before
+     * creating the WebRTC connection.
+     */
+
+    if (!microphoneStream) {
+
+        await requestMicrophoneAccess();
+
+        if (!microphoneStream) {
+
+            return;
+
+        }
+
+    }
+
+    /*
+     * Don't create another connection
+     * if one already exists.
+     */
+
+    if (!peerConnection) {
+
+        createPeerConnection();
+
+    }
+
+    /*
+     * Get the current participants.
+     */
+
+    try {
+
+        const response = await fetch(
+            `https://flying-strips-timing-large.trycloudflare.com/api/meetings/${meetingId}/participants`
+        );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Could not load participants for WebRTC."
+            );
+
+        }
+
+        const participants =
+            await response.json();
+
+        /*
+         * We need another participant before
+         * starting the voice connection.
+         */
+
+        if (participants.length < 2) {
+
+            console.log(
+                "Waiting for another participant before starting WebRTC."
+            );
+
+            return;
+
+        }
+
+        /*
+         * Use the participant with the smallest
+         * participant ID as the offer creator.
+         *
+         * This prevents both browsers from
+         * creating an offer at the same time.
+         */
+
+        const participantIds =
+            participants.map(function (participant) {
+
+                return Number(participant.id);
+
+            });
+
+        const offerCreatorId =
+            Math.min(...participantIds);
+
+        /*
+         * Only the designated participant
+         * creates the offer.
+         */
+
+        if (
+            Number(participantId)
+            !== offerCreatorId
+        ) {
+
+            console.log(
+                "This participant will wait for the WebRTC offer."
+            );
+
+            return;
+
+        }
+
+        console.log(
+            "This participant will create the WebRTC offer."
+        );
+
+        const offer =
+            await peerConnection.createOffer();
+
+        await peerConnection.setLocalDescription(
+            offer
+        );
+
+        meetingSocket.send(
+            JSON.stringify({
+
+                type: "offer",
+
+                meetingId:
+                    meetingId,
+
+                participantId:
+                    participantId,
+
+                offer:
+                    peerConnection.localDescription
+
+            })
+        );
+
+        console.log(
+            "WebRTC offer sent."
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Could not start WebRTC:",
+            error
+        );
+
+    }
+
+}
+
+
+async function handleWebRTCOffer(
+    offer
+) {
+
+    try {
+
+        /*
+         * The receiver also needs microphone
+         * access because it will send its
+         * microphone audio back.
+         */
+
+        if (!microphoneStream) {
+
+            await requestMicrophoneAccess();
+
+            if (!microphoneStream) {
+
+                return;
+
+            }
+
+        }
+
+        if (!peerConnection) {
+
+            createPeerConnection();
+
+        }
+
+        await peerConnection.setRemoteDescription(
+            new RTCSessionDescription(offer)
+        );
+
+        /*
+         * Add any ICE candidates that arrived
+         * before the offer was processed.
+         */
+
+        for (
+            const candidate
+            of pendingIceCandidates
+        ) {
+
+            await peerConnection.addIceCandidate(
+                candidate
+            );
+
+        }
+
+        pendingIceCandidates = [];
+
+        const answer =
+            await peerConnection.createAnswer();
+
+        await peerConnection.setLocalDescription(
+            answer
+        );
+
+        meetingSocket.send(
+            JSON.stringify({
+
+                type: "answer",
+
+                meetingId:
+                    meetingId,
+
+                participantId:
+                    participantId,
+
+                answer:
+                    peerConnection.localDescription
+
+            })
+        );
+
+        console.log(
+            "WebRTC answer sent."
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Could not handle WebRTC offer:",
+            error
+        );
+
+    }
+
+}
+
+
+async function handleWebRTCAnswer(
+    answer
+) {
+
+    try {
+
+        if (!peerConnection) {
+
+            return;
+
+        }
+
+        await peerConnection.setRemoteDescription(
+            new RTCSessionDescription(answer)
+        );
+
+        /*
+         * Add ICE candidates that arrived
+         * before the answer.
+         */
+
+        for (
+            const candidate
+            of pendingIceCandidates
+        ) {
+
+            await peerConnection.addIceCandidate(
+                candidate
+            );
+
+        }
+
+        pendingIceCandidates = [];
+
+        console.log(
+            "WebRTC answer accepted."
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Could not handle WebRTC answer:",
+            error
+        );
+
+    }
+
+}
+
+
+async function handleWebRTCIceCandidate(
+    candidate
+) {
+
+    try {
+
+        if (!peerConnection) {
+
+            return;
+
+        }
+
+        const iceCandidate =
+            new RTCIceCandidate(candidate);
+
+        /*
+         * If the remote description is already
+         * available, add the candidate immediately.
+         */
+
+        if (
+            peerConnection.remoteDescription
+        ) {
+
+            await peerConnection.addIceCandidate(
+                iceCandidate
+            );
+
+            console.log(
+                "Remote ICE candidate added."
+            );
+
+        } else {
+
+            /*
+             * Otherwise keep it until the
+             * remote description arrives.
+             */
+
+            pendingIceCandidates.push(
+                iceCandidate
+            );
+
+            console.log(
+                "ICE candidate queued."
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Could not handle ICE candidate:",
+            error
+        );
+
+    }
+
+}
+
+
+
 function connectToMeeting() {
 
 
@@ -336,17 +807,35 @@ function (event) {
          * PARTICIPANT JOINED
          * =========================
          */
-        if (
-            data.type === "participant_joined"
-        ) {
+       
+if (
+    data.type === "participant_joined"
+) {
 
-            console.log(
-                data.displayName
-                + " joined the meeting."
-            );
+    console.log(
+        data.displayName
+        + " joined the meeting."
+    );
 
-            loadParticipants();
+    loadParticipants();
+
+    /*
+     * Give the participant list a moment
+     * to update before starting WebRTC.
+     */
+
+    setTimeout(function () {
+
+        if (microphoneStream) {
+
+            startWebRTC();
+
         }
+
+    }, 500);
+
+}
+
 
         /*
          * =========================
@@ -364,6 +853,65 @@ function (event) {
 
             loadParticipants();
         }
+        
+/*
+ * =========================
+ * WEBRTC OFFER
+ * =========================
+ */
+
+if (data.type === "offer") {
+
+    console.log(
+        "WebRTC offer received."
+    );
+
+    handleWebRTCOffer(
+        data.offer
+    );
+
+}
+
+
+/*
+ * =========================
+ * WEBRTC ANSWER
+ * =========================
+ */
+
+if (data.type === "answer") {
+
+    console.log(
+        "WebRTC answer received."
+    );
+
+    handleWebRTCAnswer(
+        data.answer
+    );
+
+}
+
+
+/*
+ * =========================
+ * WEBRTC ICE CANDIDATE
+ * =========================
+ */
+
+if (data.type === "ice_candidate") {
+
+    console.log(
+        "WebRTC ICE candidate received."
+    );
+
+    handleWebRTCIceCandidate(
+        data.candidate
+    );
+}
+
+
+
+
 
     } catch (error) {
 
@@ -373,6 +921,7 @@ function (event) {
         );
     }
 };
+
 
 
 
@@ -554,10 +1103,23 @@ if (!microphoneStream) {
 
 }
 
+
 currentUser.micOn =
     !currentUser.micOn;
 
 updateMicrophoneButton();
+
+/*
+ * Start WebRTC after microphone access
+ * has been granted.
+ */
+
+if (microphoneStream) {
+
+    startWebRTC();
+
+}
+
 
 
 }
