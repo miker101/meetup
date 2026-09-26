@@ -79,8 +79,9 @@ try {
     ========================== */
 
    const response = await fetch(
-"https://housewives-mix-nowhere-performed.trycloudflare.com/api/meetings",
+"https://housewives-mix-nowhere-performed.trycloudflare.com/api/meetings/join",
 {
+
 method: "POST",
 
 
