@@ -78,24 +78,28 @@ try {
        SEND REQUEST
     ========================== */
 
-    const response = await fetch(
-        "http://localhost:8080/api/meetings/join",
-        {
-            method: "POST",
+   const response = await fetch(
+"https://flying-strips-timing-large.trycloudflare.com/api/meetings/join",
+{
+method: "POST",
 
-            headers: {
-                "Content-Type": "application/json"
-            },
 
-            body: JSON.stringify({
+    headers: {
+        "Content-Type": "application/json"
+    },
 
-                displayName: displayName,
+    body: JSON.stringify({
 
-                meetingPin: meetingPin
+        displayName: displayName,
 
-            })
-        }
-    );
+        meetingPin: meetingPin
+
+    })
+}
+
+
+);
+
 
     /* =========================
        HANDLE BACKEND ERROR

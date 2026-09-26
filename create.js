@@ -59,17 +59,20 @@ try {
     ========================== */
 
     const response = await fetch(
-        "http://localhost:8080/api/meetings",
-        {
-            method: "POST",
+"https://flying-strips-timing-large.trycloudflare.com/api/meetings",
+{
+method: "POST",
 
-            headers: {
-                "Content-Type": "application/json"
-            },
 
-            body: JSON.stringify(meetingData)
-        }
-    );
+    headers: {
+        "Content-Type": "application/json"
+    },
+
+    body: JSON.stringify(meetingData)
+}
+
+
+);
 
     /* =========================
        HANDLE BACKEND ERROR

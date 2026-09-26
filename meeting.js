@@ -108,8 +108,9 @@ async function loadParticipants() {
 try {
 
     const response = await fetch(
-        `http://localhost:8080/api/meetings/${meetingId}/participants`
-    );
+'https://flying-strips-timing-large.trycloudflare.com/api/meetings/${meetingId}/participants'
+);
+
 
 
     if (!response.ok) {
@@ -140,13 +141,13 @@ try {
 
     if (participants.length === 0) {
 
-        participantsList.innerHTML = `
+        participantsList.innerHTML = 
 
             <p class="no-participants">
                 No participants yet.
             </p>
 
-        `;
+        ;
 
         return;
     }
@@ -176,7 +177,7 @@ try {
                     : "Participant";
 
 
-            participantElement.innerHTML = `
+            participantElement.innerHTML ='
 
                 <div class="participant-avatar">
                     ${firstLetter}
@@ -201,7 +202,7 @@ try {
                     🎤
                 </span>
 
-            `;
+            ';
 
 
             participantsList.appendChild(
@@ -268,9 +269,10 @@ function connectToMeeting() {
 
 
 meetingSocket =
-    new WebSocket(
-        "ws://localhost:8080/ws"
-    );
+new WebSocket(
+"wss://flying-strips-timing-large.trycloudflare.com/ws"
+);
+
 
 
 /* =========================
