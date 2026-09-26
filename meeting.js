@@ -35,7 +35,7 @@ alert(
 );
 
 window.location.href =
-    "home.html";
+    "index.html";
 
 
 }
@@ -108,10 +108,8 @@ async function loadParticipants() {
 try {
 
     const response = await fetch(
-'https://flying-strips-timing-large.trycloudflare.com/api/meetings/${meetingId}/participants'
-);
-
-
+        `https://flying-strips-timing-large.trycloudflare.com/api/meetings/${meetingId}/participants`
+    );
 
     if (!response.ok) {
 
@@ -121,37 +119,31 @@ try {
 
     }
 
-
     const participants =
         await response.json();
-
 
     console.log(
         "Participants received:",
         participants
     );
 
-
     participantCountElement.textContent =
         participants.length;
 
-
     participantsList.innerHTML = "";
-
 
     if (participants.length === 0) {
 
-        participantsList.innerHTML = 
+        participantsList.innerHTML = `
 
             <p class="no-participants">
                 No participants yet.
             </p>
 
-        ;
+        `;
 
         return;
     }
-
 
     participants.forEach(
         function (participant) {
@@ -159,25 +151,21 @@ try {
             const participantElement =
                 document.createElement("div");
 
-
             participantElement.classList.add(
                 "participant"
             );
-
 
             const firstLetter =
                 participant.displayName
                     .charAt(0)
                     .toUpperCase();
 
-
             const role =
                 participant.host
                     ? "Host"
                     : "Participant";
 
-
-            participantElement.innerHTML ='
+            participantElement.innerHTML = `
 
                 <div class="participant-avatar">
                     ${firstLetter}
@@ -202,8 +190,7 @@ try {
                     🎤
                 </span>
 
-            ';
-
+            `;
 
             participantsList.appendChild(
                 participantElement
@@ -212,7 +199,6 @@ try {
         }
     );
 
-
 } catch (error) {
 
     console.error(
@@ -220,10 +206,8 @@ try {
         error
     );
 
-
     participantCountElement.textContent =
         "0";
-
 
     participantsList.innerHTML = `
 
@@ -238,6 +222,7 @@ try {
 
 }
 
+
 /* =========================
 INITIAL PARTICIPANT LOAD
 ========================= */
@@ -247,6 +232,7 @@ meetingId &&
 meetingName &&
 meetingPin &&
 displayName
+participantId
 ) {
 
 
@@ -452,6 +438,7 @@ meetingId &&
 meetingName &&
 meetingPin &&
 displayName
+participantId
 ) {
 
 
