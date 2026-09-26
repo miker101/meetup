@@ -154,10 +154,12 @@ async function loadParticipants() {
 
 
 try {
+    const response =
+await fetch(
+`https://housewives-mix-nowhere-performed.trycloudflare.com/api/meetings/${meetingId}/participants`
+);
 
-    const response = await fetch(
-        `https://flying-strips-timing-large.trycloudflare.com/api/meetings/${meetingId}/participants`
-    );
+      
 
     if (!response.ok) {
 
