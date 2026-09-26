@@ -501,7 +501,7 @@ try {
      */
     const response =
         await fetch(
-            `https://flying-strips-timing-large.trycloudflare.com/api/meetings/${meetingId}/participants`
+            `https://housewives-mix-nowhere-performed.trycloudflare.com/api/meetings/${meetingId}/participants`
         );
 
     if (!response.ok) {
@@ -1007,7 +1007,7 @@ function connectToMeeting() {
 
 meetingSocket =
 new WebSocket(
-"wss://flying-strips-timing-large.trycloudflare.com/ws"
+"wss://housewives-mix-nowhere-performed.trycloudflare.com/ws"
 );
 
 

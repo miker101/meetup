@@ -59,7 +59,7 @@ try {
     ========================== */
 
     const response = await fetch(
-"https://flying-strips-timing-large.trycloudflare.com/api/meetings",
+"https://housewives-mix-nowhere-performed.trycloudflare.com",
 {
 method: "POST",
 
