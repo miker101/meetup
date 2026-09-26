@@ -231,7 +231,7 @@ if (
 meetingId &&
 meetingName &&
 meetingPin &&
-displayName
+displayName&&
 participantId
 ) {
 
@@ -437,7 +437,7 @@ if (
 meetingId &&
 meetingName &&
 meetingPin &&
-displayName
+displayName&&
 participantId
 ) {
 
