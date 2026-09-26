@@ -49,7 +49,7 @@ const currentUser = {
 
 name: displayName,
 
-micOn: true
+micOn: false
     
 
 
@@ -1004,6 +1004,16 @@ try {
         await navigator.mediaDevices.getUserMedia({
             audio: true
         });
+    
+microphoneStream
+    .getAudioTracks()
+    .forEach(function (track) {
+
+        track.enabled = false;
+
+    });
+
+
 
     console.log(
         "Microphone access granted."
@@ -1076,54 +1086,83 @@ if (currentUser.micOn) {
 
 }
 
+
 microphoneButton.addEventListener(
-"click",
-async function () {
+    "click",
+    async function () {
+
+        /*
+         * MIC IS CURRENTLY OFF
+         * --------------------
+         * Ask for microphone permission first.
+         */
+        if (!currentUser.micOn) {
+
+            if (!microphoneStream) {
+
+                await requestMicrophoneAccess();
+
+                if (!microphoneStream) {
+
+                    return;
+
+                }
+
+            }
+
+            /*
+             * Permission was granted.
+             * Turn the microphone ON.
+             */
+            currentUser.micOn = true;
+
+            microphoneStream
+                .getAudioTracks()
+                .forEach(function (track) {
+
+                    track.enabled = true;
+
+                });
+
+            updateMicrophoneButton();
+
+            console.log(
+                "Microphone turned ON."
+            );
+
+            return;
+        }
 
 
-/*
- * If we don't have microphone access yet,
- * request it from the browser.
- */
+        /*
+         * MIC IS CURRENTLY ON
+         * -------------------
+         * Turn the microphone OFF.
+         */
+        currentUser.micOn = false;
 
-if (!microphoneStream) {
+        if (microphoneStream) {
 
-    await requestMicrophoneAccess();
+            microphoneStream
+                .getAudioTracks()
+                .forEach(function (track) {
 
-    /*
-     * If microphone access failed,
-     * stop here.
-     */
+                    track.enabled = false;
 
-    if (!microphoneStream) {
+                });
 
-        return;
+        }
+
+        updateMicrophoneButton();
+
+        console.log(
+            "Microphone turned OFF."
+        );
 
     }
-
-}
-
-
-currentUser.micOn =
-    !currentUser.micOn;
-
-updateMicrophoneButton();
-
-/*
- * Start WebRTC after microphone access
- * has been granted.
- */
-
-if (microphoneStream) {
-
-    startWebRTC();
-
-}
-
-
-
-}
 );
+
+
 
 
 updateMicrophoneButton();
