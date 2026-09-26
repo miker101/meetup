@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Join Meeting - MeetUp</title>
+
+<link rel="stylesheet" href="join.css">
+
+
+</head>
+
+<body>
+<!-- =========================
+     HEADER
+========================== -->
+
+<header class="join-header">
+
+    <a href="home.html" class="logo">
+
+        <span class="logo-mark">
+            M
+        </span>
+
+        <span class="logo-text">
+            Meet
+        </span>
+
+    </a>
+
+
+    <a
+        href="home.html"
+        class="back-button"
+    >
+        Back
+    </a>
+
+</header>
+
+
+
+<!-- =========================
+     MAIN
+========================== -->
+
+<main class="join-main">
+
+    <section class="join-card">
+
+
+        <!-- HEADING -->
+
+        <div class="join-heading">
+
+            <p class="page-label">
+                JOIN A MEETING
+            </p>
+
+            <h1>
+                Join the conversation.
+            </h1>
+
+            <p>
+                Enter your name and the six-digit
+                meeting ID shared by the host.
+            </p>
+
+        </div>
+
+
+
+        <!-- FORM -->
+
+        <form id="joinMeetingForm">
+
+
+            <!-- NAME -->
+
+            <div class="form-group">
+
+                <label for="displayName">
+                    Your name
+                </label>
+
+                <input
+                    type="text"
+                    id="displayName"
+                    name="displayName"
+                    placeholder="Enter your name"
+                    autocomplete="name"
+                    maxlength="50"
+                    required
+                >
+
+            </div>
+
+
+
+            <!-- MEETING ID -->
+
+            <div class="form-group">
+
+                <label for="meetingPin">
+                    Meeting ID
+                </label>
+
+                <input
+                    type="text"
+                    id="meetingPin"
+                    name="meetingPin"
+                    placeholder="Enter six-digit ID"
+                    inputmode="numeric"
+                    maxlength="6"
+                    autocomplete="off"
+                    required
+                >
+
+            </div>
+
+
+
+            <!-- BUTTON -->
+
+            <button
+                type="submit"
+                class="join-button"
+                id="joinButton"
+            >
+                Join Meeting
+            </button>
+
+        </form>
+
+
+
+        <!-- STATUS -->
+
+        <p
+            id="joinStatus"
+            class="join-status"
+            aria-live="polite"
+        ></p>
+
+
+    </section>
+
+</main>
+
+
+
+<script src="join.js"></script>
+
+
+</body>
+
+</html>

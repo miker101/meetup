@@ -1,0 +1,652 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  }
+
+body {
+font-family: Arial, Helvetica, sans-serif;
+background: #f5f5f2;
+color: #111111;
+}
+
+/* =========================
+PAGE
+========================= */
+
+.meeting-page {
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+}
+
+/* =========================
+HEADER
+========================= */
+
+.meeting-header {
+position: relative;
+
+
+min-height: 82px;
+
+display: flex;
+align-items: center;
+
+padding: 0 5%;
+
+background: #ffffff;
+
+border-bottom: 1px solid #e5e5e5;
+
+
+}
+
+/* =========================
+LOGO
+========================= */
+
+.meeting-brand {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.logo-mark {
+width: 40px;
+height: 40px;
+
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+border-radius: 9px;
+
+background: #111111;
+color: #ffffff;
+
+font-size: 20px;
+font-weight: 800;
+
+
+}
+
+.logo-text {
+font-size: 21px;
+font-weight: 800;
+}
+
+/* =========================
+CENTER MEETING INFO
+========================= */
+
+.meeting-info {
+position: absolute;
+
+
+left: 50%;
+top: 50%;
+
+transform: translate(-50%, -50%);
+
+text-align: center;
+
+white-space: nowrap;
+
+
+}
+
+.meeting-info h1 {
+font-size: 19px;
+font-weight: 700;
+
+
+margin-bottom: 5px;
+
+
+}
+
+.meeting-id {
+font-size: 12px;
+color: #888888;
+}
+
+.meeting-id strong {
+color: #111111;
+
+
+font-size: 13px;
+letter-spacing: 1px;
+
+
+}
+
+/* =========================
+LEAVE BUTTON
+========================= */
+
+.leave-button {
+margin-left: auto;
+
+
+padding: 10px 18px;
+
+border: 1px solid #dddddd;
+border-radius: 7px;
+
+background: #ffffff;
+color: #333333;
+
+font-size: 14px;
+font-weight: 600;
+
+cursor: pointer;
+
+transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+
+}
+
+.leave-button:hover {
+background: #f3f3f1;
+border-color: #cccccc;
+
+
+transform: translateY(-1px);
+
+
+}
+
+/* =========================
+MAIN
+========================= */
+
+.meeting-main {
+width: 100%;
+max-width: 1200px;
+
+
+margin: 0 auto;
+
+padding: 32px 5%;
+
+flex: 1;
+
+display: grid;
+
+grid-template-columns: 320px 1fr;
+
+gap: 24px;
+
+
+}
+
+/* =========================
+GENERAL CARD
+========================= */
+
+.participants-section,
+.chat-section {
+background: #ffffff;
+
+
+border: 1px solid #e2e2df;
+
+border-radius: 12px;
+
+overflow: hidden;
+
+
+}
+
+/* =========================
+PARTICIPANTS
+========================= */
+
+.participants-section {
+min-height: 520px;
+}
+
+.section-header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+
+
+padding: 20px;
+
+border-bottom: 1px solid #eeeeeb;
+
+
+}
+
+.section-header h2 {
+font-size: 18px;
+font-weight: 700;
+
+
+margin-bottom: 4px;
+
+
+}
+
+.section-header p,
+.chat-header p {
+color: #888888;
+
+
+font-size: 12px;
+
+
+}
+
+.section-header > span {
+width: 30px;
+height: 30px;
+
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+border-radius: 50%;
+
+background: #f0f0ed;
+
+color: #555555;
+
+font-size: 13px;
+font-weight: 700;
+
+
+}
+
+.participants-list {
+padding: 10px;
+}
+
+.participant {
+display: flex;
+align-items: center;
+
+
+gap: 12px;
+
+padding: 12px 10px;
+
+border-radius: 8px;
+
+transition: background 0.2s ease;
+
+
+}
+
+.participant:hover {
+background: #f7f7f4;
+}
+
+.participant-avatar {
+width: 40px;
+height: 40px;
+
+flex-shrink: 0;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+border-radius: 50%;
+
+background: #168a45;
+color: #ffffff;
+
+font-size: 14px;
+font-weight: 700;
+
+
+}
+
+.participant-details {
+flex: 1;
+    
+display: flex;
+flex-direction: column;
+
+gap: 3px;
+
+
+}
+
+.participant-name {
+font-size: 14px;
+font-weight: 600;
+}
+
+.participant-role {
+font-size: 12px;
+color: #888888;
+}
+
+.microphone-status {
+font-size: 15px;
+}
+
+/* =========================
+CHAT
+========================= */
+
+.chat-section {
+min-height: 520px;
+
+
+display: flex;
+flex-direction: column;
+
+
+}
+
+.chat-header {
+padding: 20px;
+
+
+border-bottom: 1px solid #eeeeeb;
+
+
+}
+
+.chat-header h2 {
+font-size: 18px;
+font-weight: 700;
+
+
+margin-bottom: 4px;
+
+
+}
+
+.messages {
+flex: 1;
+
+
+padding: 24px;
+
+overflow-y: auto;
+
+display: flex;
+flex-direction: column;
+
+gap: 16px;
+
+
+}
+
+.message {
+max-width: 75%;
+}
+
+.message-sender {
+display: block;
+
+
+margin-bottom: 5px;
+
+color: #168a45;
+
+font-size: 12px;
+font-weight: 700;
+
+
+}
+
+.message p {
+display: inline-block;
+    
+padding: 10px 13px;
+
+border-radius: 8px;
+
+background: #f2f2ef;
+
+color: #222222;
+
+font-size: 14px;
+
+line-height: 1.5;
+
+
+}
+
+/* =========================
+CHAT INPUT
+========================= */
+
+.chat-input-area {
+display: flex;
+
+
+gap: 10px;
+
+padding: 15px;
+
+border-top: 1px solid #eeeeeb;
+
+background: #ffffff;
+
+
+}
+
+.chat-input-area input {
+flex: 1;
+
+
+min-width: 0;
+
+height: 46px;
+
+padding: 0 14px;
+
+border: 1px solid #d7d7d4;
+border-radius: 7px;
+
+outline: none;
+
+background: #ffffff;
+color: #111111;
+
+font-family: inherit;
+font-size: 14px;
+
+
+}
+
+.chat-input-area input:focus {
+border-color: #168a45;
+
+
+box-shadow:
+    0 0 0 3px rgba(22, 138, 69, 0.08);
+
+
+}
+
+.chat-input-area button {
+height: 46px;
+
+
+padding: 0 20px;
+
+border: none;
+border-radius: 7px;
+
+background: #168a45;
+color: #ffffff;
+
+font-size: 14px;
+font-weight: 600;
+
+cursor: pointer;
+
+transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+
+
+}
+
+.chat-input-area button:hover {
+background: #11753a;
+
+
+transform: translateY(-1px);
+
+
+}
+
+/* =========================
+BOTTOM CONTROLS
+========================= */
+
+.meeting-controls {
+min-height: 78px;
+
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+gap: 12px;
+
+padding: 14px 5%;
+
+border-top: 1px solid #e5e5e5;
+
+background: #ffffff;
+
+
+}
+
+.control-button {
+min-width: 135px;
+
+
+height: 44px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+gap: 8px;
+
+padding: 0 18px;
+
+border: 1px solid #ddddda;
+border-radius: 8px;
+
+background: #f8f8f6;
+color: #222222;
+
+font-size: 14px;
+font-weight: 600;
+
+cursor: pointer;
+
+transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+
+
+}
+
+.control-button:hover {
+background: #eeeeeb;
+
+
+transform: translateY(-1px);
+
+
+}
+
+.control-button.muted {
+background: #eeeeeb;
+color: #777777;
+}
+
+/* =========================
+TABLET
+========================= */
+
+@media (max-width: 800px) {
+
+.meeting-main {
+    grid-template-columns: 1fr;
+}
+
+.participants-section,
+.chat-section {
+    min-height: 400px;
+}
+
+
+}
+
+/* =========================
+MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+
+.meeting-header {
+    min-height: 120px;
+
+    padding: 15px 6%;
+
+    align-items: flex-start;
+}
+
+.meeting-info {
+    position: absolute;
+
+    top: auto;
+    bottom: 14px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+}
+
+.meeting-info h1 {
+    font-size: 16px;
+}
+
+.leave-button {
+    padding: 9px 14px;
+}
+
+.meeting-main {
+    padding: 20px 6%;
+}
+
+.messages {
+    padding: 20px;
+}
+
+.message {
+    max-width: 90%;
+}
+
+.meeting-controls {
+    padding: 12px 6%;
+
+    flex-direction: column;
+}
+
+.control-button {
+    width: 100%;
+}
+
+
+}

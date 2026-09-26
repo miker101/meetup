@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Meeting - MeetUp</title>
+
+<link rel="stylesheet" href="meeting.css">
+
+
+</head>
+
+<body>
+
+
+<div class="meeting-page">
+
+
+    <!-- =========================
+         HEADER
+    ========================== -->
+
+    <header class="meeting-header">
+
+
+        <!-- MeetUp Logo -->
+
+        <div class="meeting-brand">
+
+            <span class="logo-mark">
+                M
+            </span>
+
+            <span class="logo-text">
+                MeetUp
+            </span>
+
+        </div>
+
+
+        <!-- Center Meeting Information -->
+
+        <div class="meeting-info">
+
+            <h1 id="meetingName">
+                Meeting Room
+            </h1>
+
+            <p class="meeting-id">
+
+                Room ID:
+
+                <strong id="meetingPin">
+                    ------
+                </strong>
+
+            </p>
+
+        </div>
+
+
+        <!-- Leave -->
+
+        <button
+            class="leave-button"
+            id="leaveButton"
+        >
+            Leave
+        </button>
+
+    </header>
+
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <main class="meeting-main">
+
+
+        <!-- =========================
+             PARTICIPANTS
+        ========================== -->
+
+        <section class="participants-section">
+
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>
+                        People
+                    </h2>
+
+                    <p>
+                        Participants in this meeting
+                    </p>
+
+                </div>
+
+                <span id="participantCount">
+                    0
+                </span>
+
+            </div>
+
+
+            <div
+                class="participants-list"
+                id="participantsList"
+            >
+
+                <!-- Participants loaded by JavaScript -->
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =========================
+             CHAT
+        ========================== -->
+
+        <section class="chat-section">
+
+
+            <div class="chat-header">
+
+                <div>
+
+                    <h2>
+                        Chat
+                    </h2>
+
+                    <p>
+                        Messages in this meeting
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="messages"
+                id="messages"
+            >
+
+                <!-- Messages will appear here -->
+
+            </div>
+
+
+            <form
+                class="chat-input-area"
+                id="chatForm"
+            >
+
+                <input
+                    type="text"
+                    id="messageInput"
+                    placeholder="Type a message..."
+                    autocomplete="off"
+                >
+
+                <button
+                    type="submit"
+                    id="sendButton"
+                >
+                    Send
+                </button>
+
+            </form>
+
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- =========================
+         MEETING CONTROLS
+    ========================== -->
+
+    <footer class="meeting-controls">
+
+
+        <button
+            class="control-button"
+            id="microphoneButton"
+        >
+
+            🎤
+
+            <span>
+                Mute
+            </span>
+
+        </button>
+
+
+        <button
+            class="control-button"
+            id="copyLinkButton"
+        >
+
+            🔗
+
+            <span>
+                Copy Link
+            </span>
+
+        </button>
+
+
+    </footer>
+
+
+</div>
+
+
+<script src="meeting.js"></script>
+
+
+</body>
+
+</html>

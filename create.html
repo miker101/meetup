@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Create Meeting - MeetUp</title>
+
+<link rel="stylesheet" href="create.css">
+
+
+</head>
+
+<body>
+
+<!-- =========================
+     HEADER
+========================== -->
+
+<header class="create-header">
+
+
+    <!-- Logo -->
+
+    <a href="home.html" class="logo">
+
+        <span class="logo-mark">
+            M
+        </span>
+
+        <span class="logo-text">
+            Meet
+        </span>
+
+    </a>
+
+
+    <!-- Back -->
+
+    <a
+        href="home.html"
+        class="back-button"
+    >
+        Back
+    </a>
+
+</header>
+
+
+
+<!-- =========================
+     MAIN
+========================== -->
+
+<main class="create-main">
+
+    <section class="create-card">
+
+
+        <!-- Heading -->
+
+        <div class="create-heading">
+
+            <p class="page-label">
+                NEW MEETING
+            </p>
+
+            <h1>
+                Create a meeting
+            </h1>
+
+            <p>
+                Enter your name and choose a name
+                for your meeting room.
+            </p>
+
+        </div>
+
+
+
+        <!-- =========================
+             FORM
+        ========================== -->
+
+        <form id="createMeetingForm">
+
+
+            <!-- Name -->
+
+            <div class="form-group">
+
+                <label for="userName">
+                    Your name
+                </label>
+
+                <input
+                    type="text"
+                    id="userName"
+                    name="userName"
+                    placeholder="Enter your name"
+                    autocomplete="name"
+                    maxlength="50"
+                    required
+                >
+
+            </div>
+
+
+
+            <!-- Room Name -->
+
+            <div class="form-group">
+
+                <label for="roomName">
+                    Meeting / Room name
+                </label>
+
+                <input
+                    type="text"
+                    id="roomName"
+                    name="roomName"
+                    placeholder="Enter meeting or room name"
+                    maxlength="100"
+                    required
+                >
+
+            </div>
+
+
+
+            <!-- Create Button -->
+
+            <button
+                type="submit"
+                class="create-button"
+                id="createMeetingButton"
+            >
+                Create Meeting
+            </button>
+
+        </form>
+
+
+
+        <!-- Status -->
+
+        <p
+            id="createStatus"
+            class="create-status"
+            aria-live="polite"
+        ></p>
+
+
+    </section>
+
+</main>
+
+
+
+<script src="create.js"></script>
+
+</body>
+
+</html>

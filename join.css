@@ -1,0 +1,342 @@
+css
+/* =========================
+   RESET
+========================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+/* =========================
+   BODY
+========================= */
+
+body {
+    min-height: 100vh;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    background: #ffffff;
+    color: #111111;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.join-header {
+    width: 100%;
+
+    height: 82px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 5%;
+
+    border-bottom: 1px solid #e8e8e8;
+}
+
+
+/* =========================
+   LOGO
+========================= */
+
+.logo {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    text-decoration: none;
+
+    color: #111111;
+}
+
+.logo-mark {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #16803c;
+    color: #ffffff;
+
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.logo-text {
+    font-size: 23px;
+    font-weight: 800;
+}
+
+
+/* =========================
+   BACK BUTTON
+========================= */
+
+.back-button {
+    padding: 10px 16px;
+
+    border: 1px solid #d9d9d9;
+    border-radius: 7px;
+
+    color: #111111;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    transition: 0.2s ease;
+}
+
+.back-button:hover {
+    background: #f5f5f5;
+
+    border-color: #111111;
+}
+
+
+/* =========================
+   MAIN
+========================= */
+
+.join-main {
+    min-height: calc(100vh - 82px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 50px 20px;
+}
+
+
+/* =========================
+   JOIN CARD
+========================= */
+
+.join-card {
+    width: 100%;
+    max-width: 520px;
+
+    padding: 42px;
+
+    border: 1px solid #e3e3e3;
+    border-radius: 12px;
+
+    background: #ffffff;
+}
+
+
+/* =========================
+   HEADING
+========================= */
+
+.join-heading {
+    margin-bottom: 32px;
+}
+
+.page-label {
+    margin-bottom: 12px;
+
+    color: #e87516;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: 2px;
+}
+
+.join-heading h1 {
+    margin-bottom: 12px;
+
+    font-size: 38px;
+
+    line-height: 1.1;
+
+    letter-spacing: -1.5px;
+}
+
+.join-heading p:last-child {
+    color: #666666;
+
+    font-size: 15px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================
+   FORM
+========================= */
+
+#joinMeetingForm {
+    display: flex;
+    flex-direction: column;
+
+    gap: 22px;
+}
+
+
+/* =========================
+   FORM GROUP
+========================= */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 14px;
+
+    font-weight: 700;
+}
+
+
+/* =========================
+   INPUT
+========================= */
+
+.form-group input {
+    width: 100%;
+
+    height: 50px;
+
+    padding: 0 15px;
+
+    border: 1px solid #d6d6d6;
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #ffffff;
+    color: #111111;
+
+    font-family: inherit;
+    font-size: 15px;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.form-group input::placeholder {
+    color: #999999;
+}
+
+.form-group input:focus {
+    border-color: #16803c;
+
+    box-shadow:
+        0 0 0 3px rgba(22, 128, 60, 0.08);
+}
+
+
+/* =========================
+   ROOM PIN
+========================= */
+
+#roomPin {
+    letter-spacing: 2px;
+}
+
+
+/* =========================
+   JOIN BUTTON
+========================= */
+
+.join-button {
+    width: 100%;
+
+    height: 50px;
+
+    margin-top: 5px;
+
+    border: none;
+    border-radius: 7px;
+
+    background: #16803c;
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.join-button:hover {
+    background: #116b31;
+
+    transform: translateY(-1px);
+}
+
+.join-button:active {
+    transform: translateY(0);
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+.join-status {
+    margin-top: 16px;
+
+    text-align: center;
+
+    color: #666666;
+
+    font-size: 14px;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+    .join-header {
+        height: 72px;
+
+        padding: 0 20px;
+    }
+
+    .join-main {
+        min-height: calc(100vh - 72px);
+
+        padding: 30px 18px;
+    }
+
+    .join-card {
+        padding: 30px 22px;
+
+        border: none;
+    }
+
+    .join-heading h1 {
+        font-size: 32px;
+    }
+
+}

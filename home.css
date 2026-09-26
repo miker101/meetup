@@ -1,0 +1,334 @@
+css
+/* =========================
+   RESET
+========================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+
+    background: #ffffff;
+    color: #111111;
+
+    min-height: 100vh;
+}
+
+
+/* =========================
+   PAGE
+========================= */
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.home-header {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 24px 5%;
+
+    border-bottom: 1px solid #e8e8e8;
+
+    background: #ffffff;
+}
+
+
+/* =========================
+   LOGO
+========================= */
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    text-decoration: none;
+    color: #111111;
+}
+
+.logo-mark {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #16803c;
+    color: #ffffff;
+
+    border-radius: 8px;
+
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.logo-text {
+    font-size: 23px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+
+/* =========================
+   HEADER BUTTONS
+========================= */
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn {
+    border: none;
+    cursor: pointer;
+
+    padding: 11px 19px;
+
+    border-radius: 7px;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+
+/* Join */
+
+.btn-join {
+    background: #ffffff;
+    color: #16803c;
+
+    border: 1px solid #16803c;
+}
+
+.btn-join:hover {
+    background: #f1f8f3;
+}
+
+
+/* Create */
+
+.btn-create {
+    background: #16803c;
+    color: #ffffff;
+}
+
+.btn-create:hover {
+    background: #116b31;
+}
+
+
+/* =========================
+   MAIN
+========================= */
+
+.home-main {
+    flex: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 80px 5%;
+}
+
+
+/* =========================
+   HERO
+========================= */
+
+.hero {
+    width: 100%;
+    max-width: 850px;
+
+    text-align: center;
+}
+
+.hero-label {
+    margin-bottom: 20px;
+
+    color: #e87516;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    letter-spacing: 2px;
+}
+
+.hero h1 {
+    font-size: clamp(48px, 7vw, 86px);
+
+    line-height: 0.98;
+
+    letter-spacing: -4px;
+
+    margin-bottom: 28px;
+}
+
+.hero h1 span {
+    color: #16803c;
+}
+
+.hero-description {
+    max-width: 600px;
+
+    margin: 0 auto 35px;
+
+    color: #555555;
+
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+
+/* =========================
+   HERO BUTTONS
+========================= */
+
+.hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+
+    flex-wrap: wrap;
+}
+
+.hero-btn {
+    padding: 15px 25px;
+
+    border-radius: 8px;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.hero-btn:hover {
+    transform: translateY(-2px);
+}
+
+
+/* Join */
+
+.hero-join {
+    background: #16803c;
+    color: #ffffff;
+
+    border: 1px solid #16803c;
+}
+
+.hero-join:hover {
+    background: #116b31;
+}
+
+
+/* Create */
+
+.hero-create {
+    background: #ffffff;
+    color: #111111;
+
+    border: 1px solid #111111;
+}
+
+.hero-create:hover {
+    background: #f5f5f5;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+.home-footer {
+    padding: 20px 5%;
+
+    text-align: center;
+
+    border-top: 1px solid #eeeeee;
+
+    color: #777777;
+
+    font-size: 13px;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 650px) {
+
+    .home-header {
+        padding: 18px 5%;
+    }
+
+    .header-actions {
+        gap: 7px;
+    }
+
+    .btn {
+        padding: 9px 12px;
+        font-size: 12px;
+    }
+
+    .logo-text {
+        font-size: 20px;
+    }
+
+    .logo-mark {
+        width: 34px;
+        height: 34px;
+        font-size: 18px;
+    }
+
+    .home-main {
+        padding: 60px 5%;
+    }
+
+    .hero h1 {
+        letter-spacing: -2px;
+    }
+
+    .hero-description {
+        font-size: 16px;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+    }
+
+    .hero-btn {
+        width: 100%;
+    }
+}
+
