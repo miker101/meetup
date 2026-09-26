@@ -621,7 +621,7 @@ function () {
 
 
     window.location.href =
-        "home.html";
+        "index.html";
     
 
 }
