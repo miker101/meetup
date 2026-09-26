@@ -54,12 +54,39 @@ micOn: false
 
 
 };
+
 let microphoneStream = null;
-let peerConnection = null;
 
-let remoteAudio = null;
 
-let pendingIceCandidates = [];
+/*
+ * Store one WebRTC connection
+ * for every remote participant.
+ *
+ * Example:
+ *
+ * peerConnections[82] = connection to participant 82
+ * peerConnections[83] = connection to participant 83
+ */
+const peerConnections = {};
+
+
+/*
+ * Store ICE candidates separately
+ * for every remote participant.
+ *
+ * Example:
+ *
+ * pendingIceCandidates[82] = candidates
+ * waiting for participant 82
+ */
+const pendingIceCandidates = {};
+
+
+/*
+ * Store remote audio elements separately
+ * for every remote participant.
+ */
+const remoteAudios = {};
 
 
 const rtcConfiguration = {
@@ -272,30 +299,51 @@ let meetingSocket = null;
 CONNECT TO MEETING
 ========================= */
 
-function createPeerConnection() {
+function createPeerConnection(remoteParticipantId) {
 
-peerConnection =
+
+const key =
+    String(remoteParticipantId);
+
+/*
+ * If a connection already exists
+ * for this participant, reuse it.
+ */
+if (peerConnections[key]) {
+
+    return peerConnections[key];
+
+}
+
+/*
+ * Create a separate WebRTC connection
+ * for this specific remote participant.
+ */
+const connection =
     new RTCPeerConnection(
         rtcConfiguration
     );
 
+peerConnections[key] =
+    connection;
+
 console.log(
-    "WebRTC peer connection created."
+    "WebRTC peer connection created for participant:",
+    remoteParticipantId
 );
 
 
 /*
  * Add our microphone tracks
- * to the WebRTC connection.
+ * to this participant's connection.
  */
-
 if (microphoneStream) {
 
     microphoneStream
         .getTracks()
         .forEach(function (track) {
 
-            peerConnection.addTrack(
+            connection.addTrack(
                 track,
                 microphoneStream
             );
@@ -306,17 +354,24 @@ if (microphoneStream) {
 
 
 /*
- * Receive audio from the other
- * participant.
+ * Receive audio from this
+ * specific participant.
  */
-
-peerConnection.ontrack =
+connection.ontrack =
     function (event) {
 
         console.log(
-            "Remote audio track received."
+            "Remote audio track received from participant:",
+            remoteParticipantId
         );
 
+        let remoteAudio =
+            remoteAudios[key];
+
+        /*
+         * Create an audio element for
+         * this participant if necessary.
+         */
         if (!remoteAudio) {
 
             remoteAudio =
@@ -324,14 +379,28 @@ peerConnection.ontrack =
                     "audio"
                 );
 
-            remoteAudio.autoplay = true;
+            remoteAudio.autoplay =
+                true;
+
+            remoteAudio.controls =
+                false;
+
+            remoteAudio.dataset.participantId =
+                key;
 
             document.body.appendChild(
                 remoteAudio
             );
 
+            remoteAudios[key] =
+                remoteAudio;
+
         }
 
+        /*
+         * Connect this participant's
+         * audio stream to their audio element.
+         */
         remoteAudio.srcObject =
             event.streams[0];
 
@@ -339,28 +408,36 @@ peerConnection.ontrack =
 
 
 /*
- * Send ICE candidates through
- * our existing WebSocket.
+ * Send ICE candidates specifically
+ * to the participant this connection
+ * belongs to.
  */
-
-peerConnection.onicecandidate =
+connection.onicecandidate =
     function (event) {
 
         if (
             event.candidate &&
-            meetingSocket
+            meetingSocket &&
+            meetingSocket.readyState ===
+                WebSocket.OPEN
         ) {
 
             meetingSocket.send(
                 JSON.stringify({
 
-                    type: "ice_candidate",
+                    type:
+                        "ice_candidate",
 
                     meetingId:
                         meetingId,
 
                     participantId:
-                        participantId,
+                        Number(participantId),
+
+                    targetParticipantId:
+                        Number(
+                            remoteParticipantId
+                        ),
 
                     candidate:
                         event.candidate
@@ -372,15 +449,239 @@ peerConnection.onicecandidate =
 
     };
 
+
+return connection;
+
 }
+
 
 async function startWebRTC() {
 
-    /*
-     * We need microphone access before
-     * creating the WebRTC connection.
-     */
 
+/*
+ * We need microphone access before
+ * creating WebRTC connections.
+ */
+if (!microphoneStream) {
+
+    await requestMicrophoneAccess();
+
+    if (!microphoneStream) {
+
+        return;
+
+    }
+
+}
+
+
+/*
+ * WebSocket must be connected before
+ * we can send WebRTC signaling messages.
+ */
+if (
+    !meetingSocket ||
+    meetingSocket.readyState !== WebSocket.OPEN
+) {
+
+    console.warn(
+        "WebSocket is not ready for WebRTC signaling."
+    );
+
+    return;
+
+}
+
+
+try {
+
+    /*
+     * Get all active participants
+     * currently inside the meeting.
+     */
+    const response =
+        await fetch(
+            `https://flying-strips-timing-large.trycloudflare.com/api/meetings/${meetingId}/participants`
+        );
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Could not load participants for WebRTC."
+        );
+
+    }
+
+
+    const participants =
+        await response.json();
+
+
+    /*
+     * Go through every participant
+     * except ourselves.
+     */
+    for (
+        const remoteParticipant
+        of participants
+    ) {
+
+        const remoteParticipantId =
+            Number(
+                remoteParticipant.id
+            );
+
+
+        /*
+         * Never create a connection
+         * to ourselves.
+         */
+        if (
+            remoteParticipantId ===
+            Number(participantId)
+        ) {
+
+            continue;
+
+        }
+
+
+        /*
+         * Create or retrieve the connection
+         * belonging to this participant.
+         */
+        const connection =
+            createPeerConnection(
+                remoteParticipantId
+            );
+        /*
+
+* Only the participant with the
+* smaller ID creates the offer.
+*
+* This prevents both sides from
+* creating offers simultaneously.
+  */
+    if (
+Number(participantId) >=
+remoteParticipantId
+) {
+
+
+continue;
+
+
+}
+
+/*
+
+* If this connection already has a
+* remote description, the connection
+* has already been established.
+*
+* Do not create another offer.
+  */
+  if (connection.remoteDescription) {
+
+  console.log(
+  "WebRTC connection already established with participant:",
+  remoteParticipantId
+  );
+
+  continue;
+
+}
+
+/*
+
+* If this connection is already
+* negotiating, don't create another offer.
+  */
+  if (
+  connection.signalingState !==
+  "stable"
+  ) {
+
+  continue;
+
+}
+
+
+        /*
+         * Create an offer for this specific
+         * participant.
+         */
+        console.log(
+            "Creating WebRTC offer for participant:",
+            remoteParticipantId
+        );
+
+
+        const offer =
+            await connection.createOffer();
+
+
+        await connection.setLocalDescription(
+            offer
+        );
+
+
+        /*
+         * Send the offer ONLY to this
+         * specific participant.
+         */
+        meetingSocket.send(
+            JSON.stringify({
+
+                type:
+                    "offer",
+
+                meetingId:
+                    meetingId,
+
+                participantId:
+                    Number(participantId),
+
+                targetParticipantId:
+                    remoteParticipantId,
+
+                offer:
+                    connection.localDescription
+
+            })
+        );
+
+
+        console.log(
+            "WebRTC offer sent to participant:",
+            remoteParticipantId
+        );
+
+    }
+
+} catch (error) {
+
+    console.error(
+        "Could not start WebRTC:",
+        error
+    );
+
+}
+
+
+}
+
+
+
+async function handleWebRTCOffer(offer,remoteParticipantId) {
+
+
+try {
+
+    /*
+     * The receiver needs microphone access
+     * because this is a two-way voice connection.
+     */
     if (!microphoneStream) {
 
         await requestMicrophoneAccess();
@@ -393,334 +694,311 @@ async function startWebRTC() {
 
     }
 
-    /*
-     * Don't create another connection
-     * if one already exists.
-     */
-
-    if (!peerConnection) {
-
-        createPeerConnection();
-
-    }
 
     /*
-     * Get the current participants.
+     * Create or retrieve the WebRTC connection
+     * belonging to the participant who sent
+     * this offer.
      */
-
-    try {
-
-        const response = await fetch(
-            `https://flying-strips-timing-large.trycloudflare.com/api/meetings/${meetingId}/participants`
+    const connection =
+        createPeerConnection(
+            remoteParticipantId
         );
 
-        if (!response.ok) {
 
-            throw new Error(
-                "Could not load participants for WebRTC."
-            );
+    /*
+     * Accept the remote participant's offer.
+     */
+    await connection.setRemoteDescription(
+        new RTCSessionDescription(offer)
+    );
 
-        }
 
-        const participants =
-            await response.json();
+    /*
+     * Get ICE candidates that arrived
+     * before the offer was processed.
+     */
+    const key =
+        String(remoteParticipantId);
 
-        /*
-         * We need another participant before
-         * starting the voice connection.
-         */
+    const queuedCandidates =
+        pendingIceCandidates[key] || [];
 
-        if (participants.length < 2) {
 
-            console.log(
-                "Waiting for another participant before starting WebRTC."
-            );
+    /*
+     * Add all queued ICE candidates
+     * to this participant's connection.
+     */
+    for (
+        const candidate
+        of queuedCandidates
+    ) {
 
-            return;
-
-        }
-
-        /*
-         * Use the participant with the smallest
-         * participant ID as the offer creator.
-         *
-         * This prevents both browsers from
-         * creating an offer at the same time.
-         */
-
-        const participantIds =
-            participants.map(function (participant) {
-
-                return Number(participant.id);
-
-            });
-
-        const offerCreatorId =
-            Math.min(...participantIds);
-
-        /*
-         * Only the designated participant
-         * creates the offer.
-         */
-
-        if (
-            Number(participantId)
-            !== offerCreatorId
-        ) {
-
-            console.log(
-                "This participant will wait for the WebRTC offer."
-            );
-
-            return;
-
-        }
-
-        console.log(
-            "This participant will create the WebRTC offer."
-        );
-
-        const offer =
-            await peerConnection.createOffer();
-
-        await peerConnection.setLocalDescription(
-            offer
-        );
-
-        meetingSocket.send(
-            JSON.stringify({
-
-                type: "offer",
-
-                meetingId:
-                    meetingId,
-
-                participantId:
-                    participantId,
-
-                offer:
-                    peerConnection.localDescription
-
-            })
-        );
-
-        console.log(
-            "WebRTC offer sent."
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Could not start WebRTC:",
-            error
+        await connection.addIceCandidate(
+            candidate
         );
 
     }
 
+
+    /*
+     * Clear the queue for this participant.
+     */
+    pendingIceCandidates[key] = [];
+
+
+    /*
+     * Create an answer for this
+     * specific remote participant.
+     */
+    const answer =
+        await connection.createAnswer();
+
+
+    await connection.setLocalDescription(
+        answer
+    );
+
+
+    /*
+     * Send the answer ONLY back to
+     * the participant who sent the offer.
+     */
+    meetingSocket.send(
+        JSON.stringify({
+
+            type:
+                "answer",
+
+            meetingId:
+                meetingId,
+
+            participantId:
+                Number(participantId),
+
+            targetParticipantId:
+                Number(remoteParticipantId),
+
+            answer:
+                connection.localDescription
+
+        })
+    );
+
+
+    console.log(
+        "WebRTC answer sent to participant:",
+        remoteParticipantId
+    );
+
+} catch (error) {
+
+    console.error(
+        "Could not handle WebRTC offer:",
+        error
+    );
+
 }
 
 
-async function handleWebRTCOffer(
-    offer
-) {
+}
 
-    try {
 
-        /*
-         * The receiver also needs microphone
-         * access because it will send its
-         * microphone audio back.
-         */
 
-        if (!microphoneStream) {
+async function handleWebRTCAnswer(answer,remoteParticipantId) {
 
-            await requestMicrophoneAccess();
 
-            if (!microphoneStream) {
+try {
 
-                return;
+    /*
+     * Get the WebRTC connection belonging
+     * to the participant who sent the answer.
+     */
+    const key =
+        String(remoteParticipantId);
 
-            }
+    const connection =
+        peerConnections[key];
 
-        }
 
-        if (!peerConnection) {
+    /*
+     * The connection should already exist
+     * because we created it when sending
+     * the original offer.
+     */
+    if (!connection) {
 
-            createPeerConnection();
-
-        }
-
-        await peerConnection.setRemoteDescription(
-            new RTCSessionDescription(offer)
+        console.warn(
+            "No WebRTC connection found for participant:",
+            remoteParticipantId
         );
 
-        /*
-         * Add any ICE candidates that arrived
-         * before the offer was processed.
-         */
+        return;
 
-        for (
-            const candidate
-            of pendingIceCandidates
-        ) {
+    }
 
-            await peerConnection.addIceCandidate(
-                candidate
-            );
+
+    /*
+     * Accept the remote participant's answer.
+     */
+    await connection.setRemoteDescription(
+        new RTCSessionDescription(answer)
+    );
+
+
+    /*
+     * Check whether any ICE candidates
+     * arrived before the answer.
+     */
+    const queuedCandidates =
+        pendingIceCandidates[key] || [];
+
+
+    /*
+     * Add those candidates to this
+     * participant's connection.
+     */
+    for (
+        const candidate
+        of queuedCandidates
+    ) {
+
+        await connection.addIceCandidate(
+            candidate
+        );
+
+    }
+
+
+    /*
+     * Clear the ICE queue for this participant.
+     */
+    pendingIceCandidates[key] = [];
+
+
+    console.log(
+        "WebRTC answer accepted from participant:",
+        remoteParticipantId
+    );
+
+} catch (error) {
+
+    console.error(
+        "Could not handle WebRTC answer:",
+        error
+    );
+
+}
+
+
+}
+
+
+
+async function handleWebRTCIceCandidate(candidate,remoteParticipantId) {
+
+
+try {
+
+    const key =
+        String(remoteParticipantId);
+
+
+    /*
+     * Convert the received candidate
+     * into an RTCIceCandidate object.
+     */
+    const iceCandidate =
+        new RTCIceCandidate(candidate);
+
+
+    /*
+     * Get the WebRTC connection belonging
+     * to this remote participant.
+     */
+    const connection =
+        peerConnections[key];
+
+
+    /*
+     * If the connection does not exist yet,
+     * store the candidate for later.
+     */
+    if (!connection) {
+
+        if (!pendingIceCandidates[key]) {
+
+            pendingIceCandidates[key] = [];
 
         }
 
-        pendingIceCandidates = [];
-
-        const answer =
-            await peerConnection.createAnswer();
-
-        await peerConnection.setLocalDescription(
-            answer
-        );
-
-        meetingSocket.send(
-            JSON.stringify({
-
-                type: "answer",
-
-                meetingId:
-                    meetingId,
-
-                participantId:
-                    participantId,
-
-                answer:
-                    peerConnection.localDescription
-
-            })
+        pendingIceCandidates[key].push(
+            iceCandidate
         );
 
         console.log(
-            "WebRTC answer sent."
+            "ICE candidate queued for participant:",
+            remoteParticipantId
         );
 
-    } catch (error) {
-
-        console.error(
-            "Could not handle WebRTC offer:",
-            error
-        );
+        return;
 
     }
 
-}
 
+    /*
+     * If the remote description has already
+     * been received, add the candidate now.
+     */
+    if (
+        connection.remoteDescription
+    ) {
 
-async function handleWebRTCAnswer(
-    answer
-) {
-
-    try {
-
-        if (!peerConnection) {
-
-            return;
-
-        }
-
-        await peerConnection.setRemoteDescription(
-            new RTCSessionDescription(answer)
+        await connection.addIceCandidate(
+            iceCandidate
         );
-
-        /*
-         * Add ICE candidates that arrived
-         * before the answer.
-         */
-
-        for (
-            const candidate
-            of pendingIceCandidates
-        ) {
-
-            await peerConnection.addIceCandidate(
-                candidate
-            );
-
-        }
-
-        pendingIceCandidates = [];
 
         console.log(
-            "WebRTC answer accepted."
+            "Remote ICE candidate added for participant:",
+            remoteParticipantId
         );
 
-    } catch (error) {
-
-        console.error(
-            "Could not handle WebRTC answer:",
-            error
-        );
+        return;
 
     }
+
+
+    /*
+     * Otherwise wait until the remote
+     * description has been processed.
+     */
+    if (!pendingIceCandidates[key]) {
+
+        pendingIceCandidates[key] = [];
+
+    }
+
+    pendingIceCandidates[key].push(
+        iceCandidate
+    );
+
+    console.log(
+        "ICE candidate queued for participant:",
+        remoteParticipantId
+    );
+
+} catch (error) {
+
+    console.error(
+        "Could not handle ICE candidate:",
+        error
+    );
 
 }
 
 
-async function handleWebRTCIceCandidate(
-    candidate
-) {
-
-    try {
-
-        if (!peerConnection) {
-
-            return;
-
-        }
-
-        const iceCandidate =
-            new RTCIceCandidate(candidate);
-
-        /*
-         * If the remote description is already
-         * available, add the candidate immediately.
-         */
-
-        if (
-            peerConnection.remoteDescription
-        ) {
-
-            await peerConnection.addIceCandidate(
-                iceCandidate
-            );
-
-            console.log(
-                "Remote ICE candidate added."
-            );
-
-        } else {
-
-            /*
-             * Otherwise keep it until the
-             * remote description arrives.
-             */
-
-            pendingIceCandidates.push(
-                iceCandidate
-            );
-
-            console.log(
-                "ICE candidate queued."
-            );
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            "Could not handle ICE candidate:",
-            error
-        );
-
-    }
-
 }
+
 
 
 
@@ -808,33 +1086,46 @@ function (event) {
          * =========================
          */
        
-if (
-    data.type === "participant_joined"
-) {
+if (data.type === "participant_joined") {
 
-    console.log(
-        data.displayName
-        + " joined the meeting."
-    );
 
-    loadParticipants();
+console.log(
+    "Participant joined:",
+    data.displayName
+);
+
+/*
+ * Refresh the participant list
+ * so the new participant appears.
+ */
+loadParticipants();
+
+/*
+ * Give the participant list a moment
+ * to update before starting WebRTC.
+ */
+setTimeout(function () {
 
     /*
-     * Give the participant list a moment
-     * to update before starting WebRTC.
+     * Only start WebRTC if this participant
+     * has already granted microphone access.
      */
+    if (
+        microphoneStream &&
+        meetingSocket &&
+        meetingSocket.readyState ===
+            WebSocket.OPEN
+    ) {
 
-    setTimeout(function () {
+        startWebRTC();
 
-        if (microphoneStream) {
+    }
 
-            startWebRTC();
+}, 500);
 
-        }
-
-    }, 500);
 
 }
+
 
 
         /*
@@ -862,15 +1153,20 @@ if (
 
 if (data.type === "offer") {
 
-    console.log(
-        "WebRTC offer received."
-    );
 
-    handleWebRTCOffer(
-        data.offer
-    );
+console.log(
+    "WebRTC offer received from participant:",
+    data.participantId
+);
+
+handleWebRTCOffer(
+    data.offer,
+    data.participantId
+);
+
 
 }
+
 
 
 /*
@@ -881,13 +1177,17 @@ if (data.type === "offer") {
 
 if (data.type === "answer") {
 
-    console.log(
-        "WebRTC answer received."
-    );
 
-    handleWebRTCAnswer(
-        data.answer
-    );
+console.log(
+    "WebRTC answer received from participant:",
+    data.participantId
+);
+
+handleWebRTCAnswer(
+    data.answer,
+    data.participantId
+);
+
 
 }
 
@@ -897,16 +1197,20 @@ if (data.type === "answer") {
  * WEBRTC ICE CANDIDATE
  * =========================
  */
-
 if (data.type === "ice_candidate") {
 
-    console.log(
-        "WebRTC ICE candidate received."
-    );
 
-    handleWebRTCIceCandidate(
-        data.candidate
-    );
+console.log(
+    "WebRTC ICE candidate received from participant:",
+    data.participantId
+);
+
+handleWebRTCIceCandidate(
+    data.candidate,
+    data.participantId
+);
+
+
 }
 
 
@@ -1129,9 +1433,12 @@ microphoneButton.addEventListener(
             console.log(
                 "Microphone turned ON."
             );
+            startWebRTC();
 
             return;
         }
+        
+        
 
 
         /*
