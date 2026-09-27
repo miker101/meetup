@@ -1009,7 +1009,7 @@ function connectToMeeting() {
 
 meetingSocket =
 new WebSocket(
-"wss://https://enclosure-treated-signs-cafe.trycloudflare.com/ws"
+"wss://enclosure-treated-signs-cafe.trycloudflare.com/ws"
 );
 
 
