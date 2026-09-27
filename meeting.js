@@ -1047,6 +1047,14 @@ JSON.stringify({
 
 
 );
+    
+setTimeout(function () {
+
+    loadParticipants();
+
+}, 500);
+
+
 
 
     };
