@@ -503,7 +503,7 @@ try {
      */
     const response =
         await fetch(
-            `https://housewives-mix-nowhere-performed.trycloudflare.com/api/meetings/${meetingId}/participants`
+            `https://https://enclosure-treated-signs-cafe.trycloudflare.com/api/meetings/${meetingId}/participants`
         );
 
     if (!response.ok) {
@@ -1009,7 +1009,7 @@ function connectToMeeting() {
 
 meetingSocket =
 new WebSocket(
-"wss://housewives-mix-nowhere-performed.trycloudflare.com/ws"
+"wss://https://enclosure-treated-signs-cafe.trycloudflare.com/ws"
 );
 
 
