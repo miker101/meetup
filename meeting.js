@@ -156,7 +156,7 @@ async function loadParticipants() {
 try {
     const response =
 await fetch(
-`https://housewives-mix-nowhere-performed.trycloudflare.com/api/meetings/${meetingId}/participants`
+`https://enclosure-treated-signs-cafe.trycloudflare.com/api/meetings/${meetingId}/participants`
 );
 
       
