@@ -16,8 +16,10 @@ PAGE
 
 .meeting-page {
 min-height: 100vh;
+
 display: flex;
 flex-direction: column;
+
 }
 
 /* =========================
@@ -39,6 +41,79 @@ background: #ffffff;
 
 border-bottom: 1px solid #e5e5e5;
 
+flex-shrink: 0;
+
+
+}
+
+/* =========================
+HEADER LEFT
+========================= */
+
+.header-left {
+display: flex;
+align-items: center;
+
+
+gap: 16px;
+
+
+}
+
+/* =========================
+PARTICIPANT TOGGLE
+========================= */
+
+.participants-toggle {
+width: 40px;
+height: 40px;
+
+
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+
+gap: 5px;
+
+border: 1px solid #dddddd;
+border-radius: 8px;
+
+background: #ffffff;
+color: #111111;
+
+cursor: pointer;
+
+transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+
+
+}
+
+.participants-toggle span {
+width: 18px;
+height: 2px;
+
+
+display: block;
+
+background: #222222;
+
+border-radius: 2px;
+
+
+}
+
+.participants-toggle:hover {
+background: #f3f3f1;
+
+
+border-color: #cccccc;
+
+transform: translateY(-1px);
+
 
 }
 
@@ -49,7 +124,11 @@ LOGO
 .meeting-brand {
 display: flex;
 align-items: center;
+
+
 gap: 10px;
+
+
 }
 
 .logo-mark {
@@ -109,7 +188,11 @@ margin-bottom: 5px;
 
 .meeting-id {
 font-size: 12px;
+
+
 color: #888888;
+
+
 }
 
 .meeting-id strong {
@@ -117,6 +200,7 @@ color: #111111;
 
 
 font-size: 13px;
+
 letter-spacing: 1px;
 
 
@@ -148,12 +232,14 @@ transition:
     border-color 0.2s ease,
     transform 0.2s ease;
 
+
 }
 
 .leave-button:hover {
 background: #f3f3f1;
-border-color: #cccccc;
 
+
+border-color: #cccccc;
 
 transform: translateY(-1px);
 
@@ -161,60 +247,118 @@ transform: translateY(-1px);
 }
 
 /* =========================
-MAIN
+MAIN MEETING AREA
 ========================= */
 
 .meeting-main {
-width: 100%;
-max-width: 1200px;
 
+    width: 100%;
 
-margin: 0 auto;
+    max-width: 1400px;
 
-padding: 32px 5%;
+    margin: 0 auto;
 
-flex: 1;
+    padding: 24px 5%;
 
-display: grid;
+    flex: 1;
 
-grid-template-columns: 320px 1fr;
+    min-height: 0;
 
-gap: 24px;
+    display: grid;
 
+    /*
+        CLOSED:
 
+        Sidebar = 0px
+        Meeting area = flexible
+        Chat = 300px
+    */
+
+    grid-template-columns:
+        0px
+        minmax(0, 1fr)
+        300px;
+
+    gap: 20px;
+
+    transition:
+        grid-template-columns 0.3s ease;
 }
+
+
+
 
 /* =========================
-GENERAL CARD
+PARTICIPANT SIDEBAR
 ========================= */
 
-.participants-section,
-.chat-section {
-background: #ffffff;
+.participants-sidebar {
 
+    width: 100%;
 
-border: 1px solid #e2e2df;
+    min-width: 0;
 
-border-radius: 12px;
+    overflow: hidden;
 
-overflow: hidden;
+    background: #ffffff;
 
+    border-right: 1px solid #e5e5e5;
+
+    display: flex;
+
+    flex-direction: column;
+
+    /*
+        Hidden position.
+
+        The sidebar moves to the left while
+        the Grid column is 0px.
+    */
+
+    opacity: 0;
+
+    transform: translateX(-100%);
+
+    transition:
+        transform 0.3s ease,
+        opacity 0.2s ease;
 
 }
+
 
 /* =========================
-PARTICIPANTS
+PARTICIPANT SIDEBAR OPEN
 ========================= */
 
-.participants-section {
-min-height: 520px;
+.meeting-page.participants-open
+.meeting-main {
+
+    grid-template-columns:
+        250px
+        minmax(0, 1fr)
+        300px;
+
 }
 
-.section-header {
+
+.meeting-page.participants-open
+.participants-sidebar {
+
+    opacity: 1;
+
+    transform: translateX(0);
+
+}
+
+
+
+.participants-sidebar-header {
 display: flex;
-align-items: center;
-justify-content: space-between;
 
+
+align-items: center;
+
+justify-content: space-between;
 
 padding: 20px;
 
@@ -223,18 +367,18 @@ border-bottom: 1px solid #eeeeeb;
 
 }
 
-.section-header h2 {
+.participants-sidebar-header h2 {
 font-size: 18px;
-font-weight: 700;
 
+
+font-weight: 700;
 
 margin-bottom: 4px;
 
 
 }
 
-.section-header p,
-.chat-header p {
+.participants-sidebar-header p {
 color: #888888;
 
 
@@ -243,12 +387,13 @@ font-size: 12px;
 
 }
 
-.section-header > span {
+.participants-sidebar-header > span {
 width: 30px;
 height: 30px;
 
 
 display: flex;
+
 align-items: center;
 justify-content: center;
 
@@ -266,12 +411,22 @@ font-weight: 700;
 
 .participants-list {
 padding: 10px;
+
+
+overflow-y: auto;
+
+
 }
+
+/* =========================
+PARTICIPANT
+========================= */
 
 .participant {
 display: flex;
-align-items: center;
 
+
+align-items: center;
 
 gap: 12px;
 
@@ -292,9 +447,11 @@ background: #f7f7f4;
 width: 40px;
 height: 40px;
 
+
 flex-shrink: 0;
 
 display: flex;
+
 align-items: center;
 justify-content: center;
 
@@ -311,8 +468,12 @@ font-weight: 700;
 
 .participant-details {
 flex: 1;
-    
+
+
+min-width: 0;
+
 display: flex;
+
 flex-direction: column;
 
 gap: 3px;
@@ -322,12 +483,20 @@ gap: 3px;
 
 .participant-name {
 font-size: 14px;
+
+
 font-weight: 600;
+
+
 }
 
 .participant-role {
 font-size: 12px;
+
+
 color: #888888;
+
+
 }
 
 .microphone-status {
@@ -335,22 +504,128 @@ font-size: 15px;
 }
 
 /* =========================
+MAIN / SCREEN SHARE STAGE
+========================= */
+
+.meeting-stage {
+min-width: 0;
+min-height: 0;
+
+
+background: #111111;
+
+border-radius: 12px;
+
+overflow: hidden;
+
+display: flex;
+
+align-items: center;
+justify-content: center;
+
+
+}
+
+.stage-content {
+width: 100%;
+height: 100%;
+
+
+min-height: 400px;
+
+display: flex;
+
+align-items: center;
+justify-content: center;
+
+padding: 30px;
+
+
+}
+
+.stage-placeholder {
+text-align: center;
+
+
+color: #ffffff;
+
+max-width: 420px;
+
+
+}
+
+.stage-icon {
+width: 64px;
+height: 64px;
+
+
+margin: 0 auto 18px;
+
+display: flex;
+
+align-items: center;
+justify-content: center;
+
+border-radius: 14px;
+
+background: #222222;
+
+font-size: 28px;
+
+
+}
+
+.stage-placeholder h2 {
+margin-bottom: 8px;
+
+
+font-size: 22px;
+
+
+}
+
+.stage-placeholder p {
+color: #aaaaaa;
+
+
+font-size: 14px;
+
+line-height: 1.5;
+
+
+}
+
+/* =========================
 CHAT
 ========================= */
 
 .chat-section {
-min-height: 520px;
+min-width: 0;
+min-height: 0;
 
+
+height: 100%;
 
 display: flex;
+
 flex-direction: column;
+
+background: #ffffff;
+
+border: 1px solid #e2e2df;
+
+border-radius: 12px;
+
+overflow: hidden;
 
 
 }
 
 .chat-header {
-padding: 20px;
+flex-shrink: 0;
 
+
+padding: 20px;
 
 border-bottom: 1px solid #eeeeeb;
 
@@ -359,32 +634,58 @@ border-bottom: 1px solid #eeeeeb;
 
 .chat-header h2 {
 font-size: 18px;
-font-weight: 700;
 
+
+font-weight: 700;
 
 margin-bottom: 4px;
 
 
 }
 
+.chat-header p {
+color: #888888;
+
+
+font-size: 12px;
+
+
+}
+
+/*
+IMPORTANT:
+
+
+The messages area takes all remaining
+space and scrolls internally.
+
+New messages therefore do NOT increase
+the page height.
+
+
+*/
+
 .messages {
 flex: 1;
 
 
-padding: 24px;
+min-height: 0;
+
+padding: 20px;
 
 overflow-y: auto;
 
 display: flex;
+
 flex-direction: column;
 
-gap: 16px;
+gap: 14px;
 
 
 }
 
 .message {
-max-width: 75%;
+max-width: 85%;
 }
 
 .message-sender {
@@ -396,6 +697,7 @@ margin-bottom: 5px;
 color: #168a45;
 
 font-size: 12px;
+
 font-weight: 700;
 
 
@@ -403,7 +705,8 @@ font-weight: 700;
 
 .message p {
 display: inline-block;
-    
+
+
 padding: 10px 13px;
 
 border-radius: 8px;
@@ -416,6 +719,8 @@ font-size: 14px;
 
 line-height: 1.5;
 
+overflow-wrap: anywhere;
+
 
 }
 
@@ -424,17 +729,18 @@ CHAT INPUT
 ========================= */
 
 .chat-input-area {
+flex-shrink: 0;
+
+
 display: flex;
 
+gap: 8px;
 
-gap: 10px;
-
-padding: 15px;
+padding: 12px;
 
 border-top: 1px solid #eeeeeb;
 
 background: #ffffff;
-
 
 }
 
@@ -444,19 +750,22 @@ flex: 1;
 
 min-width: 0;
 
-height: 46px;
+height: 44px;
 
-padding: 0 14px;
+padding: 0 12px;
 
 border: 1px solid #d7d7d4;
+
 border-radius: 7px;
 
 outline: none;
 
 background: #ffffff;
+
 color: #111111;
 
 font-family: inherit;
+
 font-size: 14px;
 
 
@@ -473,18 +782,21 @@ box-shadow:
 }
 
 .chat-input-area button {
-height: 46px;
+height: 44px;
 
 
-padding: 0 20px;
+padding: 0 16px;
 
 border: none;
+
 border-radius: 7px;
 
 background: #168a45;
+
 color: #ffffff;
 
 font-size: 14px;
+
 font-weight: 600;
 
 cursor: pointer;
@@ -506,6 +818,20 @@ transform: translateY(-1px);
 }
 
 /* =========================
+PARTICIPANT SIDEBAR OPEN
+========================= */
+
+.meeting-page.participants-open
+.meeting-main {
+grid-template-columns:
+250px
+minmax(0, 1fr)
+300px;
+}
+
+
+
+/* =========================
 BOTTOM CONTROLS
 ========================= */
 
@@ -514,6 +840,7 @@ min-height: 78px;
 
 
 display: flex;
+
 align-items: center;
 justify-content: center;
 
@@ -525,6 +852,8 @@ border-top: 1px solid #e5e5e5;
 
 background: #ffffff;
 
+flex-shrink: 0;
+
 
 }
 
@@ -535,6 +864,7 @@ min-width: 135px;
 height: 44px;
 
 display: flex;
+
 align-items: center;
 justify-content: center;
 
@@ -543,12 +873,15 @@ gap: 8px;
 padding: 0 18px;
 
 border: 1px solid #ddddda;
+
 border-radius: 8px;
 
 background: #f8f8f6;
+
 color: #222222;
 
 font-size: 14px;
+
 font-weight: 600;
 
 cursor: pointer;
@@ -565,87 +898,226 @@ background: #eeeeeb;
 
 
 transform: translateY(-1px);
-
-
 }
 
 .control-button.muted {
 background: #eeeeeb;
+
+
 color: #777777;
+
+
 }
 
 /* =========================
 TABLET
 ========================= */
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
 
-.meeting-main {
-    grid-template-columns: 1fr;
+    .meeting-main {
+
+        grid-template-columns:
+            0px
+            minmax(0, 1fr)
+            280px;
+
+    }
+
+
+    .meeting-page.participants-open
+    .meeting-main {
+
+        grid-template-columns:
+            220px
+            minmax(0, 1fr)
+            280px;
+    }
+
+
 }
 
-.participants-section,
-.chat-section {
-    min-height: 400px;
-}
-
-
-}
 
 /* =========================
 MOBILE
 ========================= */
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
+
+    .meeting-header {
+        min-height: 110px;
+
+        padding: 14px 5%;
+
+        align-items: flex-start;
+    }
 
 
-.meeting-header {
-    min-height: 120px;
+    .meeting-info {
+        position: absolute;
 
-    padding: 15px 6%;
+        top: auto;
+        bottom: 13px;
 
-    align-items: flex-start;
+        left: 50%;
+
+        transform: translateX(-50%);
+    }
+
+
+    .meeting-info h1 {
+        font-size: 16px;
+    }
+
+
+    .meeting-brand .logo-text {
+        font-size: 18px;
+    }
+
+
+    .leave-button {
+        padding: 9px 14px;
+    }
+
+
+    /* =========================
+       MAIN MOBILE LAYOUT
+    ========================= */
+
+    .meeting-main {
+
+        padding: 16px 5%;
+
+        grid-template-columns: 1fr;
+
+        gap: 16px;
+
+    }
+
+
+    .meeting-stage {
+        min-height: 360px;
+    }
+
+
+    .chat-section {
+
+        min-height: 420px;
+
+        height: 420px;
+
+    }
+
+
+    /* =========================
+       PARTICIPANT SIDEBAR
+       MOBILE OVERLAY
+    ========================= */
+
+    .participants-sidebar {
+
+        position: absolute;
+
+        z-index: 20;
+
+        top: 110px;
+
+        left: 0;
+
+        width: min(280px, 85vw);
+
+        height: calc(100vh - 188px);
+
+        border-radius: 0 12px 12px 0;
+
+        box-shadow:
+            8px 0 25px rgba(0, 0, 0, 0.12);
+
+        transform: translateX(-100%);
+
+        opacity: 0;
+
+    }
+
+
+    .meeting-page.participants-open
+    .participants-sidebar {
+
+        transform: translateX(0);
+
+        opacity: 1;
+
+    }
+
+
+    /* =========================
+       BOTTOM CONTROLS
+    ========================= */
+
+    .meeting-controls {
+
+        padding: 12px 5%;
+
+        flex-direction: row;
+
+    }
+
+
+    .control-button {
+
+        min-width: 0;
+
+        flex: 1;
+
+    }
+
 }
 
-.meeting-info {
-    position: absolute;
 
-    top: auto;
-    bottom: 14px;
 
-    left: 50%;
+/* =========================
+SMALL MOBILE
+========================= */
 
-    transform: translateX(-50%);
+@media (max-width: 450px) {
+
+
+.meeting-brand .logo-text {
+    display: none;
 }
 
 .meeting-info h1 {
-    font-size: 16px;
+    font-size: 14px;
+}
+
+.meeting-id {
+    font-size: 11px;
 }
 
 .leave-button {
-    padding: 9px 14px;
+    padding: 8px 11px;
+
+    font-size: 13px;
 }
 
-.meeting-main {
-    padding: 20px 6%;
-}
-
-.messages {
+.stage-content {
     padding: 20px;
 }
 
-.message {
-    max-width: 90%;
+.stage-placeholder h2 {
+    font-size: 18px;
 }
 
-.meeting-controls {
-    padding: 12px 6%;
-
-    flex-direction: column;
+.chat-input-area {
+    gap: 6px;
 }
 
-.control-button {
-    width: 100%;
+.chat-input-area button {
+    padding: 0 12px;
+}
+
+.control-button span {
+    font-size: 13px;
 }
 
 

@@ -135,6 +135,21 @@ document.getElementById("messageInput");
 
 const messages =
 document.getElementById("messages");
+/* =========================
+PARTICIPANT SIDEBAR
+========================= */
+
+const meetingPage =
+document.querySelector(".meeting-page");
+
+
+
+const participantsToggle =
+document.getElementById("participantsToggle");
+
+const participantsSidebar =
+document.getElementById("participantsSidebar");
+
 
 /* =========================
 DISPLAY MEETING INFORMATION
@@ -145,6 +160,44 @@ meetingName;
 
 meetingPinElement.textContent =
 meetingPin;
+
+participantsToggle.addEventListener(
+"click",
+function () {
+
+
+    const isOpen =
+        meetingPage.classList.toggle(
+            "participants-open"
+        );
+
+
+    participantsToggle.setAttribute(
+        "aria-expanded",
+        isOpen
+    );
+
+
+    if (isOpen) {
+
+        participantsToggle.setAttribute(
+            "aria-label",
+            "Close participants"
+        );
+
+    } else {
+
+        participantsToggle.setAttribute(
+            "aria-label",
+            "Open participants"
+        );
+
+    }
+
+}
+
+
+);
 
 /* =========================
 LOAD PARTICIPANTS

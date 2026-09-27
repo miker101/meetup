@@ -4,32 +4,51 @@
 
 <head>
 
-
 <meta charset="UTF-8">
 
 <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+
 >
 
 <title>Meeting - MeetUp</title>
 
 <link rel="stylesheet" href="meeting.css">
 
-
 </head>
 
 <body>
 
-
 <div class="meeting-page">
 
 
-    <!-- =========================
-         HEADER
-    ========================== -->
+<!-- =========================
+     HEADER
+========================== -->
 
-    <header class="meeting-header">
+<header class="meeting-header">
+
+
+    <!-- Left side -->
+
+    <div class="header-left">
+
+        <!-- Participant menu button -->
+
+        <button
+            type="button"
+            class="participants-toggle"
+            id="participantsToggle"
+            aria-label="Open participants"
+            aria-expanded="false"
+        >
+
+            <span></span>
+            <span></span>
+            <span></span>
+
+        </button>
 
 
         <!-- MeetUp Logo -->
@@ -46,196 +65,251 @@
 
         </div>
 
+    </div>
 
-        <!-- Center Meeting Information -->
 
-        <div class="meeting-info">
+    <!-- Center Meeting Information -->
 
-            <h1 id="meetingName">
-                Meeting Room
-            </h1>
+    <div class="meeting-info">
 
-            <p class="meeting-id">
+        <h1 id="meetingName">
+            Meeting Room
+        </h1>
 
-                Room ID:
+        <p class="meeting-id">
 
-                <strong id="meetingPin">
-                    ------
-                </strong>
+            Room ID:
 
-            </p>
+            <strong id="meetingPin">
+                ------
+            </strong>
+
+        </p>
+
+    </div>
+
+
+    <!-- Leave -->
+
+    <button
+        type="button"
+        class="leave-button"
+        id="leaveButton"
+    >
+        Leave
+    </button>
+
+</header>
+
+
+
+<!-- =========================
+     MAIN CONTENT
+========================== -->
+
+<main class="meeting-main">
+
+
+    <!-- =========================
+         PARTICIPANT SIDEBAR
+    ========================== -->
+
+    <aside
+        class="participants-sidebar"
+        id="participantsSidebar"
+    >
+
+
+        <div class="participants-sidebar-header">
+
+
+            <div>
+
+                <h2>
+                    People
+                </h2>
+
+                <p>
+                    Participants
+                </p>
+
+            </div>
+
+
+            <span id="participantCount">
+                0
+            </span>
+
 
         </div>
 
 
-        <!-- Leave -->
-
-        <button
-            class="leave-button"
-            id="leaveButton"
+        <div
+            class="participants-list"
+            id="participantsList"
         >
-            Leave
-        </button>
 
-    </header>
+            <!-- Participants loaded by JavaScript -->
+
+        </div>
+
+
+    </aside>
 
 
 
     <!-- =========================
-         MAIN CONTENT
+         MAIN MEETING / SCREEN AREA
     ========================== -->
 
-    <main class="meeting-main">
+    <section class="meeting-stage">
 
 
-        <!-- =========================
-             PARTICIPANTS
-        ========================== -->
-
-        <section class="participants-section">
+        <div class="stage-content">
 
 
-            <div class="section-header">
+            <!--
 
-                <div>
+                This area is intentionally empty for now.
 
-                    <h2>
-                        People
-                    </h2>
+                V3.1 screen sharing will use this area.
 
-                    <p>
-                        Participants in this meeting
-                    </p>
+            -->
 
+            <div class="stage-placeholder">
+
+                <div class="stage-icon">
+                    🖥️
                 </div>
 
-                <span id="participantCount">
-                    0
-                </span>
+                <h2>
+                    Meeting Area
+                </h2>
+
+                <p>
+                    Your screen sharing area will appear here.
+                </p>
 
             </div>
 
 
-            <div
-                class="participants-list"
-                id="participantsList"
-            >
-
-                <!-- Participants loaded by JavaScript -->
-
-            </div>
+        </div>
 
 
-        </section>
-
-
-
-        <!-- =========================
-             CHAT
-        ========================== -->
-
-        <section class="chat-section">
-
-
-            <div class="chat-header">
-
-                <div>
-
-                    <h2>
-                        Chat
-                    </h2>
-
-                    <p>
-                        Messages in this meeting
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div
-                class="messages"
-                id="messages"
-            >
-
-                <!-- Messages will appear here -->
-
-            </div>
-
-
-            <form
-                class="chat-input-area"
-                id="chatForm"
-            >
-
-                <input
-                    type="text"
-                    id="messageInput"
-                    placeholder="Type a message..."
-                    autocomplete="off"
-                >
-
-                <button
-                    type="submit"
-                    id="sendButton"
-                >
-                    Send
-                </button>
-
-            </form>
-
-
-        </section>
-
-
-    </main>
+    </section>
 
 
 
     <!-- =========================
-         MEETING CONTROLS
+         CHAT
     ========================== -->
 
-    <footer class="meeting-controls">
+    <aside class="chat-section">
 
 
-        <button
-            class="control-button"
-            id="microphoneButton"
+        <div class="chat-header">
+
+            <div>
+
+                <h2>
+                    Chat
+                </h2>
+
+                <p>
+                    Messages in this meeting
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- Messages scroll inside this area -->
+
+        <div
+            class="messages"
+            id="messages"
         >
 
-            🎤
+            <!-- Messages will appear here -->
 
-            <span>
-                Mute
-            </span>
-
-        </button>
+        </div>
 
 
-        <button
-            class="control-button"
-            id="copyLinkButton"
+        <!-- Chat input stays at bottom -->
+
+        <form
+            class="chat-input-area"
+            id="chatForm"
         >
 
-            🔗
+            <input
+                type="text"
+                id="messageInput"
+                placeholder="Type a message..."
+                autocomplete="off"
+            >
 
-            <span>
-                Copy Link
-            </span>
+            <button
+                type="submit"
+                id="sendButton"
+            >
+                Send
+            </button>
 
-        </button>
+        </form>
 
 
-    </footer>
+    </aside>
+
+
+</main>
+
+
+
+<!-- =========================
+     MEETING CONTROLS
+========================== -->
+
+<footer class="meeting-controls">
+
+
+    <button
+        type="button"
+        class="control-button"
+        id="microphoneButton"
+    >
+
+        🎤
+
+        <span>
+            Mute
+        </span>
+
+    </button>
+
+
+    <button
+        type="button"
+        class="control-button"
+        id="copyLinkButton"
+    >
+
+        🔗
+
+        <span>
+            Copy Link
+        </span>
+
+    </button>
+
+
+</footer>
 
 
 </div>
 
-
 <script src="meeting.js"></script>
-
 
 </body>
 
