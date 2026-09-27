@@ -44,18 +44,21 @@ window.location.href =
 CURRENT USER
 ========================= */
 
+
 const currentUser = {
-
-
-name: displayName,
-
-micOn: false
-    
-
-
+    name: displayName,
+    micOn: false
 };
 
 let microphoneStream = null;
+
+/*
+ * Speaker starts ON by default.
+ *
+ * This controls whether remote participants'
+ * audio can be heard locally.
+ */
+let speakerOn = true;
 
 
 /*
@@ -120,6 +123,9 @@ document.getElementById("participantsList");
 
 const microphoneButton =
 document.getElementById("microphoneButton");
+
+const speakerButton =
+document.getElementById("speakerButton");
 
 const leaveButton =
 document.getElementById("leaveButton");
@@ -449,6 +455,7 @@ connection.ontrack =
 
             remoteAudios[key] =
                 remoteAudio;
+            remoteAudio.muted = !speakerOn;
 
         }
 
@@ -1532,8 +1539,59 @@ microphoneButton.addEventListener(
     }
 );
 
+speakerButton.addEventListener(
+    "click",
+    function () {
+
+        /*
+         * Flip the speaker state.
+         *
+         * true  = we hear other participants
+         * false = we do not hear other participants
+         */
+        speakerOn = !speakerOn;
 
 
+        /*
+         * Apply the new speaker state
+         * to every remote participant's
+         * audio element.
+         */
+        Object.values(remoteAudios)
+            .forEach(function (audio) {
+
+                audio.muted =
+                    !speakerOn;
+
+            });
+
+
+        /*
+         * Update the button so the UI
+         * clearly shows the current state.
+         */
+        if (speakerOn) {
+
+            speakerButton.innerHTML =
+                "🔊 <span>Speaker On</span>";
+
+            speakerButton.classList.remove(
+                "muted"
+            );
+
+        } else {
+
+            speakerButton.innerHTML =
+                "🔇 <span>Speaker Off</span>";
+
+            speakerButton.classList.add(
+                "muted"
+            );
+
+        }
+
+    }
+);
 
 updateMicrophoneButton();
 
