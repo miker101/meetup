@@ -59,7 +59,7 @@ try {
     ========================== */
 
     const response = await fetch(
-"https://https://enclosure-treated-signs-cafe.trycloudflare.com/api/meetings",
+"https://enclosure-treated-signs-cafe.trycloudflare.com/api/meetings",
 {
 method: "POST",
 

@@ -503,7 +503,7 @@ try {
      */
     const response =
         await fetch(
-            `https://https://enclosure-treated-signs-cafe.trycloudflare.com/api/meetings/${meetingId}/participants`
+            `https://enclosure-treated-signs-cafe.trycloudflare.com/api/meetings/${meetingId}/participants`
         );
 
     if (!response.ok) {
