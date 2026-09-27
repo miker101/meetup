@@ -939,42 +939,63 @@ TABLET
 MOBILE
 ========================= */
 
+
 @media (max-width: 700px) {
 
-    .meeting-header {
-        min-height: 110px;
-
-        padding: 14px 5%;
-
-        align-items: flex-start;
+    .meeting-page {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
     }
 
+    .meeting-main {
+        padding: 16px 5%;
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
 
-    .meeting-info {
+    .meeting-stage {
+        min-height: 360px;
+    }
+
+    .chat-section {
+        min-height: 420px;
+        height: 420px;
+    }
+
+    .participants-sidebar {
         position: absolute;
-
-        top: auto;
-        bottom: 13px;
-
-        left: 50%;
-
-        transform: translateX(-50%);
+        z-index: 20;
+        top: 110px;
+        left: 0;
+        width: min(280px, 85vw);
+        height: calc(100vh - 188px);
+        border-radius: 0 12px 12px 0;
+        box-shadow:
+            8px 0 25px rgba(0, 0, 0, 0.12);
+        transform: translateX(-100%);
+        opacity: 0;
     }
 
-
-    .meeting-info h1 {
-        font-size: 16px;
+    .meeting-page.participants-open
+    .participants-sidebar {
+        transform: translateX(0);
+        opacity: 1;
     }
 
-
-    .meeting-brand .logo-text {
-        font-size: 18px;
+    .meeting-controls {
+        padding: 12px 5%;
+        flex-direction: row;
     }
 
-
-    .leave-button {
-        padding: 9px 14px;
+    .control-button {
+        min-width: 0;
+        flex: 1;
     }
+
+}
+
+
 
 
     /* =========================
