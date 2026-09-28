@@ -215,7 +215,7 @@ async function loadParticipants() {
 try {
     const response =
 await fetch(
-`https://enclosure-treated-signs-cafe.trycloudflare.com/api/meetings/${meetingId}/participants`
+`https://dod-publishers-tiny-charitable.trycloudflare.com/api/meetings/${meetingId}/participants`
 );
 
       
@@ -392,6 +392,120 @@ console.log(
     "WebRTC peer connection created for participant:",
     remoteParticipantId
 );
+    
+/*
+ * Monitor the overall WebRTC connection state.
+ *
+ * This tells us whether the connection actually
+ * becomes connected, fails, or gets closed.
+ */
+connection.onconnectionstatechange =
+    function () {
+
+        console.log(
+            "WebRTC connection state with participant:",
+            remoteParticipantId,
+            connection.connectionState
+        );
+
+        /*
+         * If the connection is temporarily disconnected,
+         * give it a few seconds to recover.
+         */
+        if (
+            connection.connectionState ===
+            "disconnected"
+        ) {
+
+            console.log(
+                "WebRTC connection temporarily disconnected from participant:",
+                remoteParticipantId
+            );
+
+            setTimeout(function () {
+
+                /*
+                 * Make sure this is still the same
+                 * connection stored for this participant.
+                 */
+                const currentConnection =
+                    peerConnections[
+                        String(remoteParticipantId)
+                    ];
+
+                /*
+                 * Only clean it up if it is STILL
+                 * disconnected.
+                 */
+                if (
+                    currentConnection === connection
+                    &&
+                    connection.connectionState ===
+                        "disconnected"
+                ) {
+
+                    console.log(
+                        "WebRTC connection remained disconnected. Removing stale connection:",
+                        remoteParticipantId
+                    );
+
+                    connection.close();
+
+                    delete peerConnections[
+                        String(remoteParticipantId)
+                    ];
+
+                    delete pendingIceCandidates[
+                        String(remoteParticipantId)
+                    ];
+
+                    /*
+                     * Remove stale remote audio.
+                     */
+                    const remoteAudio =
+                        remoteAudios[
+                            String(remoteParticipantId)
+                        ];
+
+                    if (remoteAudio) {
+
+                        remoteAudio.srcObject =
+                            null;
+
+                        remoteAudio.remove();
+
+                        delete remoteAudios[
+                            String(remoteParticipantId)
+                        ];
+                    }
+
+                }
+
+            }, 5000);
+
+        }
+
+    };
+
+
+/*
+ * Monitor the ICE connection state.
+ *
+ * ICE is responsible for finding the actual
+ * network path between the two participants.
+ */
+connection.oniceconnectionstatechange =
+    function () {
+
+        console.log(
+            "WebRTC ICE state with participant:",
+            remoteParticipantId,
+            connection.iceConnectionState
+        );
+
+    };
+
+
 
 
 /*
@@ -446,6 +560,9 @@ connection.ontrack =
             remoteAudio.controls =
                 false;
 
+            remoteAudio.playsInline =
+                true;
+
             remoteAudio.dataset.participantId =
                 key;
 
@@ -455,8 +572,9 @@ connection.ontrack =
 
             remoteAudios[key] =
                 remoteAudio;
-            remoteAudio.muted = !speakerOn;
 
+            remoteAudio.muted =
+                !speakerOn;
         }
 
         /*
@@ -466,14 +584,38 @@ connection.ontrack =
         remoteAudio.srcObject =
             event.streams[0];
 
+        console.log(
+            "Remote audio stream attached for participant:",
+            remoteParticipantId
+        );
+
+        /*
+         * Explicitly start playback.
+         *
+         * We do not rely only on autoplay.
+         */
+        remoteAudio.play()
+            .then(function () {
+
+                console.log(
+                    "Remote audio playback started for participant:",
+                    remoteParticipantId
+                );
+
+            })
+            .catch(function (error) {
+
+                console.warn(
+                    "Remote audio playback could not start for participant:",
+                    remoteParticipantId,
+                    error
+                );
+
+            });
+
     };
 
 
-/*
- * Send ICE candidates specifically
- * to the participant this connection
- * belongs to.
- */
 connection.onicecandidate =
     function (event) {
 
@@ -563,7 +705,7 @@ try {
      */
     const response =
         await fetch(
-            `https://enclosure-treated-signs-cafe.trycloudflare.com/api/meetings/${meetingId}/participants`
+            `https://dod-publishers-tiny-charitable.trycloudflare.com/api/meetings/${meetingId}/participants`
         );
 
     if (!response.ok) {
@@ -616,108 +758,204 @@ try {
             createPeerConnection(
                 remoteParticipantId
             );
-        /*
-
-* Only the participant with the
-* smaller ID creates the offer.
-*
-* This prevents both sides from
-* creating offers simultaneously.
-  */
-    if (
-Number(participantId) >=
-remoteParticipantId
+        
+/*
+ * Check whether this connection is no longer usable.
+ *
+ * Failed or closed connections must be removed
+ * before we decide whether an existing connection
+ * can be reused.
+ */
+if (
+    connection.connectionState === "failed" ||
+    connection.connectionState === "closed" ||
+    connection.iceConnectionState === "failed" ||
+    connection.iceConnectionState === "closed"
 ) {
 
+    console.log(
+        "Removing stale WebRTC connection:",
+        remoteParticipantId
+    );
 
-continue;
+    connection.close();
 
+    delete peerConnections[
+        String(remoteParticipantId)
+    ];
 
+    delete pendingIceCandidates[
+        String(remoteParticipantId)
+    ];
 }
+
+
+/*
+ * Get the connection again.
+ *
+ * If the previous connection was stale,
+ * createPeerConnection() will now create
+ * a completely fresh RTCPeerConnection.
+ */
+const activeConnection =
+    createPeerConnection(
+        remoteParticipantId
+    );
+
 
 /*
 
-* If this connection already has a
-* remote description, the connection
-* has already been established.
+* Decide whether this connection is already
+* being used successfully.
 *
-* Do not create another offer.
+* IMPORTANT:
+* We do NOT use remoteDescription as proof
+* that the connection is healthy.
+*
+* A stale WebRTC connection can still have
+* a remoteDescription even after the actual
+* connection has failed.
   */
-  if (connection.remoteDescription) {
+
+/*
+
+* CONNECTED
+*
+* The connection is working normally.
+* Nothing else needs to be done.
+  */
+  if (
+  activeConnection.connectionState ===
+  "connected"
+  ) {
 
   console.log(
-  "WebRTC connection already established with participant:",
+  "WebRTC connection is healthy with participant:",
   remoteParticipantId
   );
 
   continue;
-
-}
+  }
 
 /*
 
-* If this connection is already
-* negotiating, don't create another offer.
+* CONNECTING
+*
+* A negotiation is already in progress.
+* Do not create another offer.
   */
   if (
-  connection.signalingState !==
-  "stable"
+  activeConnection.connectionState ===
+  "connecting"
   ) {
 
+  console.log(
+  "WebRTC connection is currently connecting to participant:",
+  remoteParticipantId
+  );
+
   continue;
+  }
+
+/*
+
+* DISCONNECTED
+*
+* Fix 1 is responsible for handling this state.
+*
+* We give WebRTC time to recover instead of
+* immediately creating another offer.
+  */
+  if (
+  activeConnection.connectionState ===
+  "disconnected"
+  ) {
+
+  console.log(
+  "WebRTC connection is temporarily disconnected from participant:",
+  remoteParticipantId
+  );
+
+  continue;
+  }
+
+
+/*
+ * Only the participant with the smaller ID
+ * creates the offer.
+ *
+ * This prevents offer collisions.
+ */
+if (
+    Number(participantId) >=
+    remoteParticipantId
+) {
+
+    continue;
+}
+
+
+/*
+ * If the connection is already negotiating,
+ * do not create another offer.
+ */
+if (
+    activeConnection.signalingState !==
+    "stable"
+) {
+
+    continue;
 
 }
 
 
-        /*
-         * Create an offer for this specific
-         * participant.
-         */
-        console.log(
-            "Creating WebRTC offer for participant:",
-            remoteParticipantId
-        );
+/*
+ * Create an offer for this participant.
+ */
+console.log(
+    "Creating WebRTC offer for participant:",
+    remoteParticipantId
+);
 
 
-        const offer =
-            await connection.createOffer();
+const offer =
+    await activeConnection.createOffer();
 
 
-        await connection.setLocalDescription(
-            offer
-        );
+await activeConnection.setLocalDescription(
+    offer
+);
 
 
-        /*
-         * Send the offer ONLY to this
-         * specific participant.
-         */
-        meetingSocket.send(
-            JSON.stringify({
+/*
+ * Send the offer only to the intended participant.
+ */
+meetingSocket.send(
+    JSON.stringify({
 
-                type:
-                    "offer",
+        type:
+            "offer",
 
-                meetingId:
-                    meetingId,
+        meetingId:
+            meetingId,
 
-                participantId:
-                    Number(participantId),
+        participantId:
+            Number(participantId),
 
-                targetParticipantId:
-                    remoteParticipantId,
+        targetParticipantId:
+            remoteParticipantId,
 
-                offer:
-                    connection.localDescription
+        offer:
+            activeConnection.localDescription
 
-            })
-        );
+    })
+);
 
 
-        console.log(
-            "WebRTC offer sent to participant:",
-            remoteParticipantId
-        );
+console.log(
+    "WebRTC offer sent to participant:",
+    remoteParticipantId
+);
 
     }
 
@@ -1069,7 +1307,7 @@ function connectToMeeting() {
 
 meetingSocket =
 new WebSocket(
-"wss://enclosure-treated-signs-cafe.trycloudflare.com/ws"
+"wss://dod-publishers-tiny-charitable.trycloudflare.com/ws"
 );
 
 
@@ -1203,17 +1441,74 @@ setTimeout(function () {
          * PARTICIPANT LEFT
          * =========================
          */
-        if (
-            data.type === "participant_left"
-        ) {
+       
+if (
+    data.type === "participant_left"
+) {
 
-            console.log(
-                data.displayName
-                + " left the meeting."
-            );
+    console.log(
+        data.displayName
+        + " left the meeting."
+    );
 
-            loadParticipants();
-        }
+    const remoteParticipantId =
+        String(data.participantId);
+
+    /*
+     * Clean up the WebRTC connection
+     * belonging to the participant who left.
+     */
+    const connection =
+        peerConnections[remoteParticipantId];
+
+    if (connection) {
+
+        console.log(
+            "Closing WebRTC connection for participant:",
+            remoteParticipantId
+        );
+
+        connection.close();
+
+        delete peerConnections[
+            remoteParticipantId
+        ];
+    }
+
+    /*
+     * Remove any ICE candidates that were
+     * waiting for this participant.
+     */
+    delete pendingIceCandidates[
+        remoteParticipantId
+    ];
+
+    /*
+     * Remove the remote audio element so
+     * the browser no longer keeps the
+     * participant's audio around.
+     */
+    const remoteAudio =
+        remoteAudios[remoteParticipantId];
+
+    if (remoteAudio) {
+
+        remoteAudio.srcObject = null;
+
+        remoteAudio.remove();
+
+        delete remoteAudios[
+            remoteParticipantId
+        ];
+    }
+
+    /*
+     * Refresh the participant list.
+     */
+    loadParticipants();
+}
+
+
         
 /*
  * =========================
