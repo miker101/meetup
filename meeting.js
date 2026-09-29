@@ -231,7 +231,7 @@ async function loadParticipants() {
 try {
     const response =
 await fetch(
-`https://solely-calendar-predicted-environmental.trycloudflare.com/api/meetings/${meetingId}/participants`
+`https://reuters-cloth-franklin-maternity.trycloudflare.com /api/meetings/${meetingId}/participants`
 );
 
       
@@ -994,7 +994,7 @@ try {
      */
     const response =
         await fetch(
-            `https://solely-calendar-predicted-environmental.trycloudflare.com/api/meetings/${meetingId}/participants`
+            `https://reuters-cloth-franklin-maternity.trycloudflare.com/api/meetings/${meetingId}/participants`
         );
 
     if (!response.ok) {
@@ -1801,7 +1801,7 @@ function connectToMeeting() {
 
 meetingSocket =
 new WebSocket(
-"https://solely-calendar-predicted-environmental.trycloudflare.com/ws"
+"https://reuters-cloth-franklin-maternity.trycloudflare.com/ws"
 );
 
 

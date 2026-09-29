@@ -59,7 +59,7 @@ try {
     ========================== */
 
     const response = await fetch(
-"https://solely-calendar-predicted-environmental.trycloudflare.com/api/meetings",
+"https://reuters-cloth-franklin-maternity.trycloudflare.com/api/meetings",
 {
 method: "POST",
 
