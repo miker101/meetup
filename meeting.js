@@ -231,7 +231,7 @@ async function loadParticipants() {
 try {
     const response =
 await fetch(
-`https://reuters-cloth-franklin-maternity.trycloudflare.com /api/meetings/${meetingId}/participants`
+`https://reuters-cloth-franklin-maternity.trycloudflare.com/api/meetings/${meetingId}/participants`
 );
 
       
