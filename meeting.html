@@ -158,25 +158,51 @@ content="width=device-width, initial-scale=1.0"
 
 
 
-    <!-- =========================
-         MAIN MEETING / SCREEN AREA
-    ========================== -->
 
-    <section class="meeting-stage">
+<!-- =========================
+     MAIN / SCREEN SHARE STAGE
+========================== -->
+
+<section class="meeting-stage">
 
 
-        <div class="stage-content">
+    <div class="stage-content">
+
+
+        <!-- =========================
+             SCREEN SHARE DISPLAY
+        ========================== -->
+
+        <div
+            class="screen-share-area"
+            id="screenShareArea"
+        >
 
 
             <!--
+                This video element will display
+                the screen/window being shared.
 
-                This area is intentionally empty for now.
-
-                V3.1 screen sharing will use this area.
-
+                It is hidden until screen sharing
+                actually starts.
             -->
 
-            <div class="stage-placeholder">
+            <video
+                id="screenShareVideo"
+                class="screen-share-video"
+                autoplay
+                playsinline
+            ></video>
+
+
+            <!-- =========================
+                 EMPTY SCREEN STATE
+            ========================== -->
+
+            <div
+                class="screen-share-placeholder"
+                id="screenSharePlaceholder"
+            >
 
                 <div class="stage-icon">
                     🖥️
@@ -193,11 +219,61 @@ content="width=device-width, initial-scale=1.0"
             </div>
 
 
+            <!-- =========================
+                 SCREEN SHARE CONTROLS
+            ========================== -->
+
+            <div class="screen-share-controls">
+
+
+                <!-- Screen Share -->
+
+                <button
+                    type="button"
+                    class="screen-share-button"
+                    id="screenShareButton"
+                >
+
+                    🖥️
+
+                    <span>
+                        Share Screen
+                    </span>
+
+                </button>
+
+
+                <!-- Screen Recording -->
+
+                <button
+                    type="button"
+                    class="screen-record-button"
+                    id="screenRecordButton"
+                >
+
+                    ⏺
+
+                    <span>
+                        Screen Record
+                    </span>
+
+                </button>
+
+
+            </div>
+
+
         </div>
 
 
-    </section>
+    </div>
 
+
+</section>
+
+
+
+    
 
 
     <!-- =========================

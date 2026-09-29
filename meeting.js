@@ -59,6 +59,10 @@ let microphoneStream = null;
  * audio can be heard locally.
  */
 let speakerOn = true;
+let screenShareStream = null;
+
+
+
 
 
 /*
@@ -141,6 +145,18 @@ document.getElementById("messageInput");
 
 const messages =
 document.getElementById("messages");
+
+const screenShareButton =
+    document.getElementById("screenShareButton");
+
+const screenRecordButton =
+    document.getElementById("screenRecordButton");
+
+const screenShareVideo =
+    document.getElementById("screenShareVideo");
+
+const screenSharePlaceholder =
+    document.getElementById("screenSharePlaceholder");
 /* =========================
 PARTICIPANT SIDEBAR
 ========================= */
@@ -215,7 +231,7 @@ async function loadParticipants() {
 try {
     const response =
 await fetch(
-`https://dod-publishers-tiny-charitable.trycloudflare.com/api/meetings/${meetingId}/participants`
+`https://solely-calendar-predicted-environmental.trycloudflare.com/api/meetings/${meetingId}/participants`
 );
 
       
@@ -526,6 +542,23 @@ if (microphoneStream) {
         });
 
 }
+    
+if (screenShareStream) {
+
+    screenShareStream
+        .getVideoTracks()
+        .forEach(track => {
+
+            connection.addTrack(
+                track,
+                screenShareStream
+            );
+
+        });
+
+}
+
+
 
 
 /*
@@ -542,6 +575,115 @@ connection.ontrack =
 
         let remoteAudio =
             remoteAudios[key];
+    const remoteStream =
+        event.streams[0];
+
+    const track =
+        event.track;
+    
+        // =========================
+    // SCREEN SHARE VIDEO
+    // =========================
+
+   
+if (track.kind === "video") {
+
+    console.log(
+        "Remote screen video received from:",
+        remoteParticipantId
+    );
+
+
+    screenShareVideo.srcObject =
+        remoteStream;
+
+
+    screenShareVideo.style.display =
+        "block";
+
+
+    screenSharePlaceholder.style.display =
+        "none";
+
+
+    /*
+     * Try automatic playback first.
+     *
+     * Chrome may block this because the user
+     * has not interacted with the page yet.
+     */
+    
+screenShareVideo.muted = true;
+screenShareVideo.autoplay = true;
+screenShareVideo.playsInline = true;
+
+    screenShareVideo.play()
+        .then(() => {
+
+            console.log(
+                "Remote screen playback started."
+            );
+
+        })
+        .catch(error => {
+
+            console.warn(
+                "Remote screen playback requires user interaction:",
+                error
+            );
+
+            /*
+             * Show the placeholder again so the user
+             * has something visible to click.
+             */
+            screenSharePlaceholder.style.display =
+                "flex";
+
+            screenSharePlaceholder.innerHTML = `
+                <h2>Screen share received</h2>
+                <p>Click here to view the shared screen.</p>
+            `;
+
+            screenSharePlaceholder.style.cursor =
+                "pointer";
+
+            screenSharePlaceholder.onclick =
+                function () {
+
+                    screenShareVideo.play()
+                        .then(() => {
+
+                            screenSharePlaceholder.style.display =
+                                "none";
+
+                            screenSharePlaceholder.onclick =
+                                null;
+
+                            screenSharePlaceholder.style.cursor =
+                                "default";
+
+                            console.log(
+                                "Remote screen playback started after user interaction."
+                            );
+
+                        })
+                        .catch(playError => {
+
+                            console.error(
+                                "Could not start remote screen playback:",
+                                playError
+                            );
+
+                        });
+
+                };
+
+        });
+
+
+    return;
+}
+
 
         /*
          * Create an audio element for
@@ -658,15 +800,162 @@ return connection;
 
 }
 
+function addScreenShareToExistingConnections() {
 
-async function startWebRTC() {
+    if (!screenShareStream) {
+        return;
+    }
+
+
+    const screenTrack =
+        screenShareStream.getVideoTracks()[0];
+
+
+    if (!screenTrack) {
+        return;
+    }
+
+
+    Object.entries(peerConnections).forEach(
+        ([remoteParticipantId, peerConnection]) => {
+
+            const senderExists =
+                peerConnection
+                    .getSenders()
+                    .some(sender =>
+                        sender.track === screenTrack
+                    );
+
+
+            if (senderExists) {
+                return;
+            }
+
+
+            peerConnection.addTrack(
+                screenTrack,
+                screenShareStream
+            );
+
+
+            console.log(
+                "Screen track added to participant:",
+                remoteParticipantId
+            );
+
+        }
+    );
+
+}
+
+async function renegotiateScreenShare() {
+
+    if (!meetingSocket ||
+        meetingSocket.readyState !== WebSocket.OPEN) {
+
+        console.warn(
+            "WebSocket is not open. Cannot renegotiate screen share."
+        );
+
+        return;
+    }
+
+
+    for (const [
+        remoteParticipantId,
+        peerConnection
+    ] of Object.entries(peerConnections)) {
+
+        if (
+            peerConnection.connectionState === "closed" ||
+            peerConnection.connectionState === "failed"
+        ) {
+            continue;
+        }
+
+
+        if (
+            peerConnection.signalingState !==
+            "stable"
+        ) {
+            console.log(
+                "Skipping renegotiation for participant:",
+                remoteParticipantId,
+                "because signaling state is:",
+                peerConnection.signalingState
+            );
+
+            continue;
+        }
+
+
+        try {
+
+            const offer =
+                await peerConnection.createOffer();
+
+
+            await peerConnection.setLocalDescription(
+                offer
+            );
+
+
+            meetingSocket.send(
+                JSON.stringify({
+
+                    type: "offer",
+
+                    meetingId: meetingId,
+
+                    participantId: participantId,
+
+                    targetParticipantId:
+                        remoteParticipantId,
+
+                    offer: offer
+
+                })
+            );
+
+
+            console.log(
+                "Screen-share renegotiation sent to:",
+                remoteParticipantId
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Screen-share renegotiation failed for:",
+                remoteParticipantId,
+                error
+            );
+
+        }
+
+    }
+
+}
+
+
+async function startWebRTC(requireMicrophone = true,forceOffer = false) {
+
+
 
 
 /*
- * We need microphone access before
- * creating WebRTC connections.
+ * Voice WebRTC requires microphone access.
+ *
+ * Screen sharing does not.
+ *
+ * This allows V3 screen sharing to establish
+ * WebRTC connections while the microphone
+ * remains OFF.
  */
-if (!microphoneStream) {
+if (
+    requireMicrophone &&
+    !microphoneStream
+) {
 
     await requestMicrophoneAccess();
 
@@ -705,7 +994,7 @@ try {
      */
     const response =
         await fetch(
-            `https://dod-publishers-tiny-charitable.trycloudflare.com/api/meetings/${meetingId}/participants`
+            `https://solely-calendar-predicted-environmental.trycloudflare.com/api/meetings/${meetingId}/participants`
         );
 
     if (!response.ok) {
@@ -881,20 +1170,22 @@ const activeConnection =
 
 
 /*
- * Only the participant with the smaller ID
- * creates the offer.
+ * During normal voice WebRTC setup,
+ * only the participant with the smaller ID
+ * creates the initial offer.
  *
- * This prevents offer collisions.
+ * During screen sharing, the participant
+ * who started sharing must be allowed
+ * to create the offer.
  */
 if (
+    !forceOffer &&
     Number(participantId) >=
     remoteParticipantId
 ) {
 
     continue;
 }
-
-
 /*
  * If the connection is already negotiating,
  * do not create another offer.
@@ -971,64 +1262,50 @@ console.log(
 
 }
 
-
-
 async function handleWebRTCOffer(offer,remoteParticipantId) {
 
 
 try {
 
+    const key =
+        String(remoteParticipantId);
+
     /*
-     * The receiver needs microphone access
-     * because this is a two-way voice connection.
+     * Get the connection belonging
+     * to the participant who sent the offer.
+     *
+     * If it does not exist yet, create it.
      */
-    if (!microphoneStream) {
+    let connection =
+        peerConnections[key];
 
-        await requestMicrophoneAccess();
+    if (!connection) {
 
-        if (!microphoneStream) {
-
-            return;
-
-        }
+        connection =
+            createPeerConnection(
+                remoteParticipantId
+            );
 
     }
 
-
     /*
-     * Create or retrieve the WebRTC connection
-     * belonging to the participant who sent
-     * this offer.
-     */
-    const connection =
-        createPeerConnection(
-            remoteParticipantId
-        );
-
-
-    /*
-     * Accept the remote participant's offer.
+     * Apply the incoming offer.
+     *
+     * This is what tells WebRTC:
+     * "The remote participant now wants
+     * to send us another media track."
      */
     await connection.setRemoteDescription(
         new RTCSessionDescription(offer)
     );
 
-
     /*
-     * Get ICE candidates that arrived
+     * Add any ICE candidates that arrived
      * before the offer was processed.
      */
-    const key =
-        String(remoteParticipantId);
-
     const queuedCandidates =
         pendingIceCandidates[key] || [];
 
-
-    /*
-     * Add all queued ICE candidates
-     * to this participant's connection.
-     */
     for (
         const candidate
         of queuedCandidates
@@ -1040,51 +1317,50 @@ try {
 
     }
 
-
-    /*
-     * Clear the queue for this participant.
-     */
     pendingIceCandidates[key] = [];
 
-
     /*
-     * Create an answer for this
-     * specific remote participant.
+     * Create an answer for the participant
+     * who sent the offer.
      */
     const answer =
         await connection.createAnswer();
-
 
     await connection.setLocalDescription(
         answer
     );
 
-
     /*
-     * Send the answer ONLY back to
-     * the participant who sent the offer.
+     * Send the answer back to the participant
+     * who created the offer.
      */
-    meetingSocket.send(
-        JSON.stringify({
+    if (
+        meetingSocket &&
+        meetingSocket.readyState ===
+            WebSocket.OPEN
+    ) {
 
-            type:
-                "answer",
+        meetingSocket.send(
+            JSON.stringify({
 
-            meetingId:
-                meetingId,
+                type: "answer",
 
-            participantId:
-                Number(participantId),
+                meetingId:
+                    meetingId,
 
-            targetParticipantId:
-                Number(remoteParticipantId),
+                participantId:
+                    Number(participantId),
 
-            answer:
-                connection.localDescription
+                targetParticipantId:
+                    Number(remoteParticipantId),
 
-        })
-    );
+                answer:
+                    connection.localDescription
 
+            })
+        );
+
+    }
 
     console.log(
         "WebRTC answer sent to participant:",
@@ -1102,7 +1378,6 @@ try {
 
 
 }
-
 
 
 async function handleWebRTCAnswer(answer,remoteParticipantId) {
@@ -1300,6 +1575,225 @@ try {
 }
 
 
+async function startScreenSharing() {
+
+    try {
+
+        // Ask the browser to let the user choose
+        // a screen, window, or browser tab to share.
+        const stream =
+            await navigator.mediaDevices.getDisplayMedia({
+                video: true,
+                audio: false
+            });
+
+
+        // Save the screen-sharing stream.
+        screenShareStream = stream;
+
+
+        // Display the shared screen in our meeting area.
+        screenShareVideo.srcObject =
+            screenShareStream;
+
+
+        // Show the video.
+        screenShareVideo.style.display =
+            "block";
+
+
+        // Hide the empty meeting-area message.
+        screenSharePlaceholder.style.display =
+            "none";
+
+
+        // Detect when the user stops sharing
+        // using the browser's built-in Stop Sharing button.
+       
+const screenTrack =
+    screenShareStream.getVideoTracks()[0];
+
+
+screenTrack.addEventListener(
+    "ended",
+    stopScreenSharing
+);
+        
+console.log(
+    "Peer connections before screen-share renegotiation:",
+    Object.keys(peerConnections)
+);
+
+
+
+
+
+/*
+ * Make sure WebRTC connections exist even
+ * when the microphone is OFF.
+ *
+ * The second argument allows the screen
+ * sharer to initiate the offer regardless
+ * of participant ID.
+ */
+await startWebRTC(
+    false,
+    true
+);
+
+/*
+ * Add the screen track to any connections
+ * that already existed.
+ */
+addScreenShareToExistingConnections();
+
+/*
+ * Renegotiate so the remote participant
+ * receives the new screen track.
+ */
+await renegotiateScreenShare();
+
+
+
+console.log(
+    "Screen sharing started."
+);
+
+/*
+ * Tell everyone in this meeting that
+ * this participant started sharing.
+ */
+if (
+    meetingSocket &&
+    meetingSocket.readyState ===
+        WebSocket.OPEN
+) {
+
+    meetingSocket.send(
+        JSON.stringify({
+
+            type:
+                "screen_share_started"
+
+        })
+    );
+
+}
+
+}catch (error) {
+
+    console.error(
+        "Screen sharing failed:",
+        error
+    );
+
+}
+}
+function stopScreenSharing() {
+
+    // Stop all tracks belonging to the screen share.
+    if (screenShareStream) {
+
+        screenShareStream
+            .getTracks()
+            .forEach(track => track.stop());
+
+    }
+
+
+    // Remove the stream from the video element.
+    screenShareVideo.srcObject = null;
+
+
+    // Hide the screen-share video.
+    screenShareVideo.style.display = "none";
+
+
+    // Show the empty meeting-area message again.
+    screenSharePlaceholder.style.display = "flex";
+
+
+    // Clear the stored screen-share stream.
+    screenShareStream = null;
+
+
+    console.log(
+    "Screen sharing stopped."
+);
+
+/*
+ * Tell everyone in this meeting that
+ * this participant stopped sharing.
+ */
+if (
+    meetingSocket &&
+    meetingSocket.readyState ===
+        WebSocket.OPEN
+) {
+
+    meetingSocket.send(
+        JSON.stringify({
+
+            type:
+                "screen_share_stopped"
+
+        })
+    );
+
+}
+
+}
+/* =========================
+SCREEN SHARE NOTIFICATION
+========================= */
+
+function showScreenShareNotification(message) {
+
+    /*
+     * Remove an existing notification
+     * so notifications do not stack up.
+     */
+    const existingNotification =
+        document.getElementById(
+            "screenShareNotification"
+        );
+
+    if (existingNotification) {
+
+        existingNotification.remove();
+
+    }
+
+    /*
+     * Create the notification element.
+     */
+    const notification =
+        document.createElement("div");
+
+    notification.id =
+        "screenShareNotification";
+
+    notification.className =
+        "screen-share-notification";
+
+    notification.textContent =
+        "🖥️ " + message;
+
+    document.body.appendChild(
+        notification
+    );
+
+    /*
+     * Automatically remove the notification
+     * after a few seconds.
+     */
+    setTimeout(function () {
+
+        notification.remove();
+
+    }, 4000);
+
+}
 
 
 function connectToMeeting() {
@@ -1307,7 +1801,7 @@ function connectToMeeting() {
 
 meetingSocket =
 new WebSocket(
-"wss://dod-publishers-tiny-charitable.trycloudflare.com/ws"
+"https://solely-calendar-predicted-environmental.trycloudflare.com/ws"
 );
 
 
@@ -1387,6 +1881,42 @@ function (event) {
                 data.message
             );
         }
+        /*
+ * =========================
+ * SCREEN SHARE STARTED
+ * =========================
+ */
+
+if (
+    data.type ===
+    "screen_share_started"
+) {
+
+    showScreenShareNotification(
+        data.displayName
+        + " is sharing their screen."
+    );
+
+}
+
+
+/*
+ * =========================
+ * SCREEN SHARE STOPPED
+ * =========================
+ */
+
+if (
+    data.type ===
+    "screen_share_stopped"
+) {
+
+    showScreenShareNotification(
+        data.displayName
+        + " stopped sharing their screen."
+    );
+
+}
 
         /*
          * =========================
@@ -1418,16 +1948,41 @@ setTimeout(function () {
      * Only start WebRTC if this participant
      * has already granted microphone access.
      */
-    if (
-        microphoneStream &&
-        meetingSocket &&
-        meetingSocket.readyState ===
-            WebSocket.OPEN
-    ) {
+    /*
+ * Start normal WebRTC if the microphone
+ * has already been enabled.
+ */
+if (
+    microphoneStream &&
+    meetingSocket &&
+    meetingSocket.readyState ===
+        WebSocket.OPEN
+) {
 
-        startWebRTC();
+    startWebRTC();
 
-    }
+}
+
+
+/*
+ * If screen sharing is already active,
+ * establish a WebRTC connection for the
+ * new participant and send the existing
+ * screen stream.
+ */
+if (
+    screenShareStream &&
+    meetingSocket &&
+    meetingSocket.readyState ===
+        WebSocket.OPEN
+) {
+
+    startWebRTC(
+        false,
+        true
+    );
+
+}
 
 }, 500);
 
@@ -1998,6 +2553,12 @@ function () {
 
 
 );
+screenShareButton.addEventListener(
+    "click",
+    startScreenSharing
+);
+
+
 
 /* =========================
 ADD CHAT MESSAGE
