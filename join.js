@@ -78,10 +78,9 @@ try {
        SEND REQUEST
     ========================== */
 
-   const response = await fetch(
-"https://reuters-cloth-franklin-maternity.trycloudflare.com/api/meetings/join",
-{
-
+  const response = await fetch(
+    "https://grew-embassy-debate-otherwise.trycloudflare.com/api/meetings/join",
+    {
 method: "POST",
 
 

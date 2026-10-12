@@ -4,24 +4,41 @@
   padding: 0;
   }
 
+
+
 body {
-font-family: Arial, Helvetica, sans-serif;
-background: #f5f5f2;
-color: #111111;
+    font-family: Arial, sans-serif;
+    background: #e8edf7;
+    color: #172033;
 }
 
-/* =========================
-PAGE
-========================= */
+
 
 .meeting-page {
     height: 100vh;
-
     display: flex;
     flex-direction: column;
-
     overflow: hidden;
+    background:
+        radial-gradient(
+            ellipse at 0% 0%,
+            rgba(129, 140, 248, 0.18),
+            transparent 42%
+        ),
+        radial-gradient(
+            ellipse at 100% 100%,
+            rgba(96, 165, 250, 0.14),
+            transparent 40%
+        ),
+        linear-gradient(
+            135deg,
+            #edf1fb 0%,
+            #e8edf7 50%,
+            #f0effb 100%
+        );
 }
+
+
 /* =========================
 HEADER
 ========================= */
@@ -37,11 +54,16 @@ align-items: center;
 
 padding: 0 5%;
 
-background: #ffffff;
-
-border-bottom: 1px solid #e5e5e5;
-
 flex-shrink: 0;
+background: linear-gradient(
+    100deg,
+    #f8f9ff 0%,
+    #ffffff 48%,
+    #f3f6ff 100%
+);
+border-bottom: 1px solid #d8e1f1;
+box-shadow: 0 3px 16px rgba(24, 39, 75, 0.05);
+
 
 
 }
@@ -150,6 +172,14 @@ font-weight: 800;
 
 
 }
+
+.logo-image {
+    height: 40px;
+    width: auto;
+    display: block;
+    object-fit: contain;
+}
+
 
 .logo-text {
 font-size: 21px;
@@ -295,12 +325,12 @@ PARTICIPANT SIDEBAR
     width: 100%;
 
     min-width: 0;
+    border: 1px solid #e0e7f1;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 
     overflow: hidden;
-
-    background: #ffffff;
-
-    border-right: 1px solid #e5e5e5;
 
     display: flex;
 
@@ -351,67 +381,58 @@ PARTICIPANT SIDEBAR OPEN
 
 
 .participants-sidebar-header {
-display: flex;
-
-
 align-items: center;
 
 justify-content: space-between;
-
-padding: 20px;
-
-border-bottom: 1px solid #eeeeeb;
+padding: 22px 18px;
+background: linear-gradient(135deg, #f0f4ff, #ffffff);
+border-bottom: 1px solid #e5eaf3;
+display: flex;
 
 
 }
 
+#participantCount {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #e0e7ff;
+    color: #3730a3;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+
 .participants-sidebar-header h2 {
-font-size: 18px;
-
-
-font-weight: 700;
 
 margin-bottom: 4px;
+color: #172554;
+font-size: 19px;
+font-weight: 700;
+letter-spacing: -0.4px;
 
 
 }
 
 .participants-sidebar-header p {
-color: #888888;
-
-
+color: #718096;
 font-size: 12px;
+margin-top: 5px;
 
 
 }
 
-.participants-sidebar-header > span {
-width: 30px;
-height: 30px;
-
-
-display: flex;
-
-align-items: center;
-justify-content: center;
-
-border-radius: 50%;
-
-background: #f0f0ed;
-
-color: #555555;
-
-font-size: 13px;
-font-weight: 700;
-
-
-}
 
 .participants-list {
-padding: 10px;
-
-
 overflow-y: auto;
+padding: 12px;
+display: flex;
+flex-direction: column;
+gap: 8px;
 
 
 }
@@ -421,24 +442,23 @@ PARTICIPANT
 ========================= */
 
 .participant {
-display: flex;
-
-
-align-items: center;
-
-gap: 12px;
-
-padding: 12px 10px;
-
-border-radius: 8px;
-
-transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #f8faff;
+    border: 1px solid #edf1f8;
+    border-radius: 12px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    position: relative;
+    box-shadow: 0 2px 6px rgba(30, 41, 59, 0.03);
 
 
 }
 
 .participant:hover {
-background: #f7f7f4;
+    background: #eef3ff;
+    border-color: #d9e2ff;
 }
 
 .participant-avatar {
@@ -452,14 +472,13 @@ display: flex;
 
 align-items: center;
 justify-content: center;
-
-border-radius: 50%;
-
-background: #168a45;
-color: #ffffff;
-
 font-size: 14px;
+    
+border-radius: 12px;
+background: linear-gradient(135deg, #4f46e5, #7c3aed);
+color: #ffffff;
 font-weight: 700;
+box-shadow: 0 3px 8px rgba(79, 70, 229, 0.18);
 
 
 }
@@ -480,49 +499,53 @@ gap: 3px;
 }
 
 .participant-name {
-font-size: 14px;
 
-
-font-weight: 600;
+    color: #1e293b;
+    font-size: 13px;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
 
 }
 
 .participant-role {
-font-size: 12px;
-
-
-color: #888888;
-
+color: #64748b;
+font-size: 11px;
+margin-top: 4px;
 
 }
 
 .microphone-status {
 font-size: 15px;
+margin-left: auto;
+flex-shrink: 0;
 }
 
 /* =========================
 MAIN / SCREEN SHARE STAGE
 ========================= */
 
+
 .meeting-stage {
-min-width: 0;
-min-height: 0;
-
-
-background: #111111;
-
-border-radius: 12px;
-
-overflow: hidden;
-
-display: flex;
-
-align-items: center;
-justify-content: center;
-
-
+    background:
+        radial-gradient(
+            ellipse at 50% 35%,
+            #202b49 0%,
+            #111827 65%,
+            #0b1020 100%
+        );
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
 }
+
 
 
 .stage-content {
@@ -896,11 +919,10 @@ flex-direction: column;
 
 background: #ffffff;
 
-border: 1px solid #e2e2df;
-
-border-radius: 12px;
-
 overflow: hidden;
+border: 1px solid #e0e7f1;
+border-radius: 16px;
+box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 
 
 }
@@ -910,8 +932,8 @@ flex-shrink: 0;
 
 
 padding: 20px;
-
-border-bottom: 1px solid #eeeeeb;
+background: linear-gradient(135deg, #f0f4ff, #ffffff);
+border-bottom: 1px solid #e5eaf3;
 
 
 }
@@ -923,15 +945,14 @@ font-size: 18px;
 font-weight: 700;
 
 margin-bottom: 4px;
+color: #172554;
 
 
 }
 
 .chat-header p {
-color: #888888;
-
-
 font-size: 12px;
+color: #718096;
 
 
 }
@@ -978,11 +999,13 @@ display: block;
 
 margin-bottom: 5px;
 
-color: #168a45;
+
+color: #4f46e5;
 
 font-size: 12px;
 
 font-weight: 700;
+    
 
 
 }
@@ -994,16 +1017,15 @@ display: inline-block;
 padding: 10px 13px;
 
 border-radius: 8px;
-
-background: #f2f2ef;
-
-color: #222222;
+border: 1px solid #e0e7ff;
 
 font-size: 14px;
 
 line-height: 1.5;
 
 overflow-wrap: anywhere;
+background: #eef2ff;
+color: #1e293b;
 
 
 }
@@ -1037,8 +1059,7 @@ min-width: 0;
 height: 44px;
 
 padding: 0 12px;
-
-border: 1px solid #d7d7d4;
+border: 1px solid #d8e0ef;
 
 border-radius: 7px;
 
@@ -1051,16 +1072,14 @@ color: #111111;
 font-family: inherit;
 
 font-size: 14px;
+    
 
 
 }
 
 .chat-input-area input:focus {
-border-color: #168a45;
-
-
-box-shadow:
-    0 0 0 3px rgba(22, 138, 69, 0.08);
+border-color: #6366f1;
+box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 
 
 }
@@ -1120,78 +1139,58 @@ BOTTOM CONTROLS
 ========================= */
 
 .meeting-controls {
-min-height: 78px;
-
-
-display: flex;
-
-align-items: center;
-justify-content: center;
-
-gap: 12px;
-
-padding: 14px 5%;
-
-border-top: 1px solid #e5e5e5;
-
-background: #ffffff;
-
-flex-shrink: 0;
-
+    min-height: 78px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px 5%;
+    border-top: 1px solid #e0e7f1;
+    background: linear-gradient(
+    100deg,
+    #f0f3fc 0%,
+    #fafbff 100%,
+    #eef2fc 100%
+);
+    flex-shrink: 0;
 
 }
+
 
 .control-button {
-min-width: 135px;
-
-
-height: 44px;
-
-display: flex;
-
-align-items: center;
-justify-content: center;
-
-gap: 8px;
-
-padding: 0 18px;
-
-border: 1px solid #ddddda;
-
-border-radius: 8px;
-
-background: #f8f8f6;
-
-color: #222222;
-
-font-size: 14px;
-
-font-weight: 600;
-
-cursor: pointer;
-
-transition:
-    background 0.2s ease,
-    transform 0.2s ease;
-
-
+    min-width: 135px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 18px;
+    border: 1px solid #dbe3f0;
+    border-radius: 12px;
+    background: #f4f6fc;
+    color: #273454;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease,
+                border-color 0.2s ease,
+                color 0.2s ease;
 }
 
+
+
 .control-button:hover {
-background: #eeeeeb;
-
-
-transform: translateY(-1px);
+    background: #e8edff;
+    border-color: #c7d2fe;
+    color: #3730a3;
 }
 
 .control-button.muted {
-background: #eeeeeb;
-
-
-color: #777777;
-
-
+    background: #fff1f2;
+    border-color: #fecdd3;
+    color: #be123c;
 }
+
 
 /* =========================
 TABLET
@@ -1257,11 +1256,14 @@ MOBILE
         left: 0;
         width: min(280px, 85vw);
         height: calc(100vh - 188px);
-        border-radius: 0 12px 12px 0;
-        box-shadow:
-            8px 0 25px rgba(0, 0, 0, 0.12);
         transform: translateX(-100%);
         opacity: 0;
+        
+    background: #ffffff;
+    border: 1px solid #e0e7f1;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
     }
 
     .meeting-page.participants-open

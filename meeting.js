@@ -51,15 +51,17 @@ const currentUser = {
 };
 
 let microphoneStream = null;
-
-/*
- * Speaker starts ON by default.
- *
- * This controls whether remote participants'
- * audio can be heard locally.
- */
 let speakerOn = true;
 let screenShareStream = null;
+
+/*
+ * Tracks who currently owns screen sharing
+ * in this meeting.
+ *
+ * null = nobody is sharing
+ * participantId = that participant is sharing
+ */
+let screenShareOwnerId = null;
 
 
 
@@ -229,9 +231,8 @@ async function loadParticipants() {
 
 
 try {
-    const response =
-await fetch(
-`https://reuters-cloth-franklin-maternity.trycloudflare.com/api/meetings/${meetingId}/participants`
+  const response = await fetch(
+    `https://grew-embassy-debate-otherwise.trycloudflare.com/api/meetings/${meetingId}/participants`
 );
 
       
@@ -994,7 +995,7 @@ try {
      */
     const response =
         await fetch(
-            `https://reuters-cloth-franklin-maternity.trycloudflare.com/api/meetings/${meetingId}/participants`
+            `https://grew-embassy-debate-otherwise.trycloudflare.com/api/meetings/${meetingId}/participants`
         );
 
     if (!response.ok) {
@@ -1574,6 +1575,80 @@ try {
 
 }
 
+function updateScreenShareButton() {
+
+    const button =
+        document.getElementById(
+            "screenShareButton"
+        );
+
+    if (!button) {
+        return;
+    }
+
+
+    /*
+     * Nobody is currently sharing.
+     */
+    if (screenShareOwnerId === null) {
+
+        button.textContent =
+            "🖥️ Share Screen";
+
+        button.disabled = false;
+
+        button.classList.remove(
+            "screen-share-active",
+            "screen-share-disabled"
+        );
+
+        return;
+    }
+
+
+    /*
+     * I am the current screen sharer.
+     */
+    if (
+        String(screenShareOwnerId) ===
+        String(participantId)
+    ) {
+
+        button.textContent =
+            "⏹ Stop Sharing";
+
+        button.disabled = false;
+
+        button.classList.add(
+            "screen-share-active"
+        );
+
+        button.classList.remove(
+            "screen-share-disabled"
+        );
+
+        return;
+    }
+
+
+    /*
+     * Another participant is sharing.
+     */
+    button.textContent =
+        "🖥️ Screen Sharing";
+
+    button.disabled = true;
+
+    button.classList.add(
+        "screen-share-disabled"
+    );
+
+    button.classList.remove(
+        "screen-share-active"
+    );
+}
+
+
 
 async function startScreenSharing() {
 
@@ -1801,7 +1876,7 @@ function connectToMeeting() {
 
 meetingSocket =
 new WebSocket(
-"https://reuters-cloth-franklin-maternity.trycloudflare.com/ws"
+"https://grew-embassy-debate-otherwise.trycloudflare.com/ws"
 );
 
 
@@ -1887,35 +1962,62 @@ function (event) {
  * =========================
  */
 
+/*
+ * SCREEN SHARE STARTED
+ */
 if (
     data.type ===
     "screen_share_started"
 ) {
 
+    /*
+     * Remember who is currently sharing.
+     */
+    screenShareOwnerId =
+        data.participantId;
+
+    /*
+     * Update my Share Screen button
+     * based on who is sharing.
+     */
+    updateScreenShareButton();
+
+    /*
+     * Show notification.
+     */
     showScreenShareNotification(
         data.displayName
         + " is sharing their screen."
     );
-
 }
 
 
 /*
- * =========================
  * SCREEN SHARE STOPPED
- * =========================
  */
-
 if (
     data.type ===
     "screen_share_stopped"
 ) {
 
+    /*
+     * Nobody is currently sharing.
+     */
+    screenShareOwnerId = null;
+
+    /*
+     * Update my button so it becomes
+     * available again.
+     */
+    updateScreenShareButton();
+
+    /*
+     * Show notification.
+     */
     showScreenShareNotification(
         data.displayName
         + " stopped sharing their screen."
     );
-
 }
 
         /*
@@ -2553,10 +2655,52 @@ function () {
 
 
 );
+
 screenShareButton.addEventListener(
     "click",
-    startScreenSharing
+    async function () {
+
+        /*
+         * I am currently sharing.
+         * Clicking the button should stop sharing.
+         */
+        if (
+            String(screenShareOwnerId) ===
+            String(participantId)
+        ) {
+
+            stopScreenSharing();
+
+            return;
+        }
+
+
+        /*
+         * Someone else is currently sharing.
+         * The button should already be disabled,
+         * but this prevents sharing even if the
+         * handler is triggered programmatically.
+         */
+        if (
+            screenShareOwnerId !== null
+            &&
+            String(screenShareOwnerId) !==
+            String(participantId)
+        ) {
+
+            return;
+        }
+
+
+        /*
+         * Nobody is sharing.
+         * Start my screen share.
+         */
+        await startScreenSharing();
+
+    }
 );
+
 
 
 
